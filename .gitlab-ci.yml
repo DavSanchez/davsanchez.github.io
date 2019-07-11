@@ -1,7 +1,7 @@
 image: haskell:latest
 
 before_script:
-  - stack init
+  - stack setup
 
 pages:
   stage: deploy
