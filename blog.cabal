@@ -7,8 +7,6 @@ executable dr-hakyll
   hs-source-dirs:      app
   main-is:             Main.hs
   ghc-options:         -threaded
-  -- build-depends:       base >= 4.7 && < 5
-  --                    , hakyll >= 4.6 && < 5
-  build-depends:      base
-                    , hakyll
+  build-depends:       base >= 4.7 && < 5
+                     , hakyll >= 4.6 && < 5
   default-language:    Haskell2010
