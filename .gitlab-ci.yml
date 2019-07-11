@@ -2,7 +2,7 @@ image: haskell:latest
 
 before_script:
   - stack install hakyll
-  - stack init
+  - stack setup
   - stack build
 
 pages:
