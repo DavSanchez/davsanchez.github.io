@@ -1,12 +1,13 @@
 image: haskell:latest
 
 before_script:
+  - stack install hakyll
   - stack init
+  - stack build
 
 pages:
   stage: deploy
   script:
-  - stack build
   - stack exec blog build
   artifacts:
     paths:
