@@ -92,7 +92,7 @@ feedConfiguration =
     , feedRoot = ""
     }
 
-config :: FeedConfiguration
+config :: Configuration
 config = defaultConfiguration
   { destinationDirectory = "public"
   }

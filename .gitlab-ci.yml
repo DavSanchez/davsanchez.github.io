@@ -1,13 +1,12 @@
-image: haskell:latest
+image: haskell:8.4.4
 
 before_script:
-  - stack setup
-  - stack build
+  - stack --system-ghc build
 
 pages:
   stage: deploy
   script:
-  - stack exec blog build
+  - stack --system-ghc exec blog build
   artifacts:
     paths:
     - public
