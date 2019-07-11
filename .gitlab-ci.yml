@@ -2,9 +2,8 @@ image: haskell:latest
 
 before_script:
   - stack upgrade
-  - stack install hakyll
-  - stack setup
-  - stack build
+  #- stack setup
+  - stack install
 
 pages:
   stage: deploy
