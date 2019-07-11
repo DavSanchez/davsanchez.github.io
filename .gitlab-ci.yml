@@ -1,7 +1,6 @@
 image: haskell:latest
 
 before_script:
-  - stack init
   - stack setup
   - stack build
 
