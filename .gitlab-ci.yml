@@ -1,0 +1,14 @@
+image: haskell:latest
+
+pages:
+  stage: deploy
+  script:
+  - stack setup
+  - stack build
+  - stack exec dr-hakyll build
+  #- stack exec dr-hakyll watch
+  artifacts:
+    paths:
+    - public
+  only:
+  - master
