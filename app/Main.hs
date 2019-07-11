@@ -7,7 +7,7 @@ import Hakyll
 
 main :: IO ()
 main =
-  hakyll $ do
+  hakyllWith config $ do
     match "images/*" $ do
       route idRoute
       compile copyFileCompiler
@@ -91,3 +91,8 @@ feedConfiguration =
     , feedAuthorEmail = "dr-hakyll@dr-hakyll.com"
     , feedRoot = ""
     }
+
+config :: FeedConfiguration
+config = defaultConfiguration
+  { destinationDirectory = "public"
+  }

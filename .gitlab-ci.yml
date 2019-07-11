@@ -1,12 +1,13 @@
 image: haskell:latest
 
+before_script:
+  - stack setup
+
 pages:
   stage: deploy
   script:
-  - stack setup
   - stack build
-  - stack exec dr-hakyll build
-  #- stack exec dr-hakyll watch
+  - stack exec blog build
   artifacts:
     paths:
     - public
