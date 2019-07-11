@@ -2,7 +2,7 @@ image: haskell:latest
 
 before_script:
   - stack upgrade
-  - stack setup
+  - stack init
   - stack install
 
 pages:
