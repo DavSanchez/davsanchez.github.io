@@ -2,4 +2,14 @@
 title: Contact
 ---
 
-Dr. Hakyll is not to be contacted.
+Contact me at:
+
+- david
+- \[dot\]
+- sanchez
+- \[dot\]
+- lt
+- \[at\]
+- gmail
+- \[dot\]
+- com

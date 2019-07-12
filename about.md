@@ -2,4 +2,6 @@
 title: About
 ---
 
-This is the story of Dr. Hakyll.
+Here you can find some software engineer's musings.
+
+(**This is a work in progress!**)
