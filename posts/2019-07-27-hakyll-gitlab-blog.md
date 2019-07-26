@@ -14,7 +14,8 @@ At the time of writing this post, the blog's aesthetics are not so customized. I
 First of all, I got [that template I was talking about](https://github.com/stackbuilders/dr-hakyll), which includes Bootstrap and support for RSS/Atom:
 
 ```bash
-git clone https://github.com/stackbuilders/dr-hakyll && cd dr-hakyll
+git clone https://github.com/stackbuilders/dr-hakyll
+cd dr-hakyll
 ```
 
 # Modifying the project configuration
