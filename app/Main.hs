@@ -50,7 +50,7 @@ main =
         posts <- recentFirst =<< loadAll "posts/*"
         let indexContext =
               listField "posts" postContext (return posts) `mappend`
-              constField "title" "Home" `mappend`
+              constField "title" "Blog" `mappend`
               defaultContext
 
         getResourceBody
@@ -85,10 +85,10 @@ postContext =
 feedConfiguration :: FeedConfiguration
 feedConfiguration =
   FeedConfiguration
-    { feedTitle = "Dr. Hakyll's Blog"
-    , feedDescription = "Dr. Hakyll's blog"
-    , feedAuthorName = "Dr. Hakyll"
-    , feedAuthorEmail = "dr-hakyll@dr-hakyll.com"
+    { feedTitle = "DavSanchez"
+    , feedDescription = "DavSanchez's blog"
+    , feedAuthorName = "DavSanchez"
+    , feedAuthorEmail = ""
     , feedRoot = ""
     }
 
