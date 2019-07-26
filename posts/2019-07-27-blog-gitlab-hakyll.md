@@ -1,5 +1,5 @@
 ---
-title: Making a Hakyll Blog with GitLab Pages
+title: Making your own blog with GitLab Pages and Hakyll
 author: DavSanchez
 ---
 
