@@ -12,3 +12,5 @@ pages:
     - public
   only:
   - master
+  
+  # add test stage for develop
