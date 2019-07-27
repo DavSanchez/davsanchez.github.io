@@ -1,12 +1,24 @@
-name:               blog
-version:            0.1.0
-build-type:         Simple
-cabal-version:      >= 1.10
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 26e1df06cdb0acc3060e5b564e876706c49c6ee1727d4c5c418cfe1669aed9d9
+
+name:           blog
+version:        0.0.0
+build-type:     Simple
 
 executable blog
-  hs-source-dirs:      app
-  main-is:             Main.hs
-  ghc-options:         -threaded
-  build-depends:       base >= 4.7 && < 5
-                     , hakyll >= 4.6 && < 5
-  default-language:    Haskell2010
+  main-is: Main.hs
+  other-modules:
+      Paths_blog
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -threaded
+  build-depends:
+      base
+    , hakyll
+    , pandoc
+  default-language: Haskell2010

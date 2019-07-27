@@ -4,6 +4,7 @@ module Main (main) where
 
 import Data.Monoid (mappend)
 import Hakyll
+import Text.Pandoc.Options
 
 main :: IO ()
 main =
@@ -18,13 +19,13 @@ main =
 
     match (fromList ["about.md", "contact.md"]) $ do
       route (setExtension "html")
-      compile $ pandocCompiler
+      compile $ pandocMathCompiler -- Changed from pandocCompiler
         >>= loadAndApplyTemplate "templates/default.html" defaultContext
         >>= relativizeUrls
 
     match "posts/*" $ do
       route (setExtension "html")
-      compile $ pandocCompiler
+      compile $ pandocMathCompiler -- Changed from pandocCompiler
         >>= loadAndApplyTemplate "templates/post.html" postContext
         >>= saveSnapshot "content"
         >>= loadAndApplyTemplate "templates/default.html" postContext
@@ -97,6 +98,23 @@ config = defaultConfiguration
   { destinationDirectory = "public"
   }
 
+pandocMathCompiler :: Compiler (Item String)
+pandocMathCompiler =
+  let
+    mathExtensions =
+      [ Ext_tex_math_dollars
+      , Ext_tex_math_double_backslash
+      , Ext_latex_macros
+      ]
+    defaultExtensions = writerExtensions defaultHakyllWriterOptions
+    newExtensions = foldr enableExtension defaultExtensions mathExtensions
+    writerOptions =
+      defaultHakyllWriterOptions
+      { writerExtensions = newExtensions
+      , writerHTMLMathMethod = MathJax ""
+      }
+  in pandocCompilerWith defaultHakyllReaderOptions writerOptions
+
 -- -- Math + Bib?
 -- -- In the main function of site.hs
 -- match "assets/*.bib" $ compile biblioCompiler
@@ -110,8 +128,3 @@ config = defaultConfiguration
 --     where
 --         read = readPandocBiblio defaultHakyllReaderOptions
 --         write = writePandocWith writerOptions
-
-writerOptions :: WriterOptions
-writerOptions = defaultHakyllWriterOptions
-    { writerHTMLMathMethod = MathJax ""
-    }
