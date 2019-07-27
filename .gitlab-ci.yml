@@ -16,6 +16,6 @@ pages:
 test:
   stage: test
   script:
-    - stack —-system-ghc exec blog build
+    - stack --system-ghc exec blog build
   only:
     - develop
