@@ -6,9 +6,16 @@ before_script:
 pages:
   stage: deploy
   script:
-  - stack --system-ghc exec blog build
+    - stack --system-ghc exec blog build
   artifacts:
     paths:
     - public
   only:
-  - master
+    - master
+  
+test:
+  stage: test
+  script:
+    - stack —-system-ghc exec blog build
+  only:
+    - develop
