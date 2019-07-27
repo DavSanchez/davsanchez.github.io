@@ -5,6 +5,10 @@ module Main (main) where
 import Data.Monoid (mappend)
 import Hakyll
 
+-- Math output
+import Text.Pandoc.Options
+import qualified Data.Set as S
+
 main :: IO ()
 main =
   hakyllWith config $ do
@@ -18,13 +22,13 @@ main =
 
     match (fromList ["about.md", "contact.md"]) $ do
       route (setExtension "html")
-      compile $ pandocCompiler
+      compile $ pandocMathCompiler -- Modified from pandocCompiler
         >>= loadAndApplyTemplate "templates/default.html" defaultContext
         >>= relativizeUrls
 
     match "posts/*" $ do
       route (setExtension "html")
-      compile $ pandocCompiler
+      compile $ pandocMathCompiler -- Modified from pandocCompiler
         >>= loadAndApplyTemplate "templates/post.html" postContext
         >>= saveSnapshot "content"
         >>= loadAndApplyTemplate "templates/default.html" postContext
@@ -96,3 +100,35 @@ config :: Configuration
 config = defaultConfiguration
   { destinationDirectory = "public"
   }
+
+-- Math output function, replace all instances of pandocCompiler with pandocMathCompiler
+-- Type signature?
+pandocMathCompiler =
+    let mathExtensions = [Ext_tex_math_dollars, Ext_tex_math_double_backslash,
+                          Ext_latex_macros]
+        defaultExtensions = writerExtensions defaultHakyllWriterOptions
+        newExtensions = foldr S.insert defaultExtensions mathExtensions
+        writerOptions = defaultHakyllWriterOptions {
+                          writerExtensions = newExtensions,
+                          writerHTMLMathMethod = MathJax ""
+                        }
+    in pandocCompilerWith defaultHakyllReaderOptions writerOptions
+
+-- -- Math + Bib?
+-- -- In the main function of site.hs
+-- match "assets/*.bib" $ compile biblioCompiler
+-- match "assets/*.csl" $ compile cslCompiler
+-- -- Somewhere at the top level of site.hs
+-- customPandocCompiler :: Compiler (Item String)
+-- customPandocCompiler = do
+--     csl <- load $ fromFilePath "assets/apa.csl"
+--     bib <- load $ fromFilePath "assets/citations.bib"
+--     fmap write (getResourceString >>= read csl bib)
+--     where
+--         read = readPandocBiblio defaultHakyllReaderOptions
+--         write = writePandocWith writerOptions
+
+-- writerOptions :: WriterOptions
+-- writerOptions = defaultHakyllWriterOptions
+--     { writerHTMLMathMethod = MathJax ""
+--     }
