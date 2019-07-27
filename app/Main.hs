@@ -18,13 +18,13 @@ main =
 
     match (fromList ["about.md", "contact.md"]) $ do
       route (setExtension "html")
-      compile $ pandocMathCompiler -- Modified from pandocCompiler
+      compile $ pandocCompiler
         >>= loadAndApplyTemplate "templates/default.html" defaultContext
         >>= relativizeUrls
 
     match "posts/*" $ do
       route (setExtension "html")
-      compile $ pandocMathCompiler -- Modified from pandocCompiler
+      compile $ pandocCompiler
         >>= loadAndApplyTemplate "templates/post.html" postContext
         >>= saveSnapshot "content"
         >>= loadAndApplyTemplate "templates/default.html" postContext
