@@ -1,0 +1,15 @@
+name: blog
+
+dependencies:
+  - base
+  - hakyll
+  - pandoc
+
+ghc-options:
+  - -Wall
+  - -threaded
+
+executables:
+  blog:
+    source-dirs: app
+    main: Main.hs
