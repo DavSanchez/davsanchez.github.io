@@ -6,8 +6,8 @@ import Data.Monoid (mappend)
 import Hakyll
 
 -- Math output
-import Text.Pandoc.Options
-import qualified Data.Set as S
+-- import Text.Pandoc.Options
+-- import qualified Data.Set as S
 
 main :: IO ()
 main =
@@ -128,7 +128,7 @@ pandocMathCompiler =
 --         read = readPandocBiblio defaultHakyllReaderOptions
 --         write = writePandocWith writerOptions
 
--- writerOptions :: WriterOptions
--- writerOptions = defaultHakyllWriterOptions
---     { writerHTMLMathMethod = MathJax ""
---     }
+writerOptions :: WriterOptions
+writerOptions = defaultHakyllWriterOptions
+    { writerHTMLMathMethod = MathJax ""
+    }
