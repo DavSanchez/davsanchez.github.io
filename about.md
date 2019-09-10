@@ -8,4 +8,6 @@ David is a telecom engineer, currently making a living in the software world.
 
 Maybe he can make good use of this blog and write something useful, or whatever comes to his mind!
 
-__More info:__ [Homepage](https://davsanchez.gitlab.io/)
+  - __More info:__ [Homepage](https://davsanchez.gitlab.io/)
+  - [__CV (en)__](https://davsanchez.gitlab.io/20sCV-es/CV-en.pdf)
+  - [__CV (es)__](https://davsanchez.gitlab.io/20sCV-es/CV-es.pdf)
