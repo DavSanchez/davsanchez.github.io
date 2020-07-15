@@ -23,26 +23,28 @@ main =
 
     match (fromList ["about.md", "contact.md"]) $ do
       route (setExtension "html")
-      compile $ pandocMathCompiler -- Changed from pandocCompiler
-        >>= loadAndApplyTemplate "templates/default.html" defaultContext
-        >>= relativizeUrls
+      compile $
+        pandocMathCompiler -- Changed from pandocCompiler
+          >>= loadAndApplyTemplate "templates/default.html" defaultContext
+          >>= relativizeUrls
 
     match "posts/*" $ do
       route (setExtension "html")
-      compile $ pandocMathCompiler -- Changed from pandocCompiler
-        >>= loadAndApplyTemplate "templates/post.html" postContext
-        >>= saveSnapshot "content"
-        >>= loadAndApplyTemplate "templates/default.html" postContext
-        >>= relativizeUrls
+      compile $
+        pandocMathCompiler -- Changed from pandocCompiler
+          >>= loadAndApplyTemplate "templates/post.html" postContext
+          >>= saveSnapshot "content"
+          >>= loadAndApplyTemplate "templates/default.html" postContext
+          >>= relativizeUrls
 
     create ["archive.html"] $ do
       route idRoute
       compile $ do
         posts <- recentFirst =<< loadAll "posts/*"
         let archiveContext =
-              listField "posts" postContext (return posts) `mappend`
-              constField "title" "Archives" `mappend`
-              defaultContext
+              listField "posts" postContext (return posts)
+                `mappend` constField "title" "Archives"
+                `mappend` defaultContext
 
         makeItem ""
           >>= loadAndApplyTemplate "templates/archive.html" archiveContext
@@ -54,9 +56,9 @@ main =
       compile $ do
         posts <- recentFirst =<< loadAll "posts/*"
         let indexContext =
-              listField "posts" postContext (return posts) `mappend`
-              constField "title" "Blog" `mappend`
-              defaultContext
+              listField "posts" postContext (return posts)
+                `mappend` constField "title" "Blog"
+                `mappend` defaultContext
 
         getResourceBody
           >>= applyAsTemplate indexContext
@@ -68,15 +70,17 @@ main =
     create ["atom.xml"] $ do
       route idRoute
       compile $ do
-        posts <- fmap (take 10) . recentFirst
-                   =<< loadAllSnapshots "posts/*" "content"
+        posts <-
+          fmap (take 10) . recentFirst
+            =<< loadAllSnapshots "posts/*" "content"
         renderAtom feedConfiguration feedContext posts
 
     create ["rss.xml"] $ do
       route idRoute
       compile $ do
-        posts <- fmap (take 10) . recentFirst
-                   =<< loadAllSnapshots "posts/*" "content"
+        posts <-
+          fmap (take 10) . recentFirst
+            =<< loadAllSnapshots "posts/*" "content"
         renderRss feedConfiguration feedContext posts
 
 feedContext :: Context String
@@ -90,34 +94,34 @@ postContext =
 feedConfiguration :: FeedConfiguration
 feedConfiguration =
   FeedConfiguration
-    { feedTitle = "DavSanchez"
-    , feedDescription = "DavSanchez's blog"
-    , feedAuthorName = "DavSanchez"
-    , feedAuthorEmail = ""
-    , feedRoot = ""
+    { feedTitle = "DavSanchez",
+      feedDescription = "DavSanchez's blog",
+      feedAuthorName = "DavSanchez",
+      feedAuthorEmail = "",
+      feedRoot = ""
     }
 
 config :: Configuration
-config = defaultConfiguration
-  { destinationDirectory = "public"
-  }
+config =
+  defaultConfiguration
+    { destinationDirectory = "public"
+    }
 
 pandocMathCompiler :: Compiler (Item String)
 pandocMathCompiler =
-  let
-    mathExtensions =
-      [ Ext_tex_math_dollars
-      , Ext_tex_math_double_backslash
-      , Ext_latex_macros
-      ]
-    defaultExtensions = writerExtensions defaultHakyllWriterOptions
-    newExtensions = foldr enableExtension defaultExtensions mathExtensions
-    writerOptions =
-      defaultHakyllWriterOptions
-      { writerExtensions = newExtensions
-      , writerHTMLMathMethod = MathJax ""
-      }
-  in pandocCompilerWith defaultHakyllReaderOptions writerOptions
+  let mathExtensions =
+        [ Ext_tex_math_dollars,
+          Ext_tex_math_double_backslash,
+          Ext_latex_macros
+        ]
+      defaultExtensions = writerExtensions defaultHakyllWriterOptions
+      newExtensions = foldr enableExtension defaultExtensions mathExtensions
+      writerOptions =
+        defaultHakyllWriterOptions
+          { writerExtensions = newExtensions,
+            writerHTMLMathMethod = MathJax ""
+          }
+   in pandocCompilerWith defaultHakyllReaderOptions writerOptions
 
 -- -- Math + Bib?
 -- -- In the main function of site.hs
