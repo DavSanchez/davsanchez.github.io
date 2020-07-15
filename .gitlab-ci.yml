@@ -1,21 +1,31 @@
-image: haskell:8.4.4
+image: haskell:latest
 
 before_script:
-  - stack --system-ghc build
+  - apt-get update && apt-get install xz-utils make
+  - export STACK_ROOT=`pwd`/.stack
+  - stack setup
+  - stack install --only-dependencies
+  - stack build
+
+build:
+  cache:
+    paths:
+      - _cache
+      - .stack
+  script:
+    - stack exec site build
+  except:
+    - master
 
 pages:
-  stage: deploy
+  cache:
+    paths:
+      - _cache
+      - .stack
   script:
-    - stack --system-ghc exec blog build
+    - stack exec site build
   artifacts:
     paths:
-    - public
+      - public
   only:
     - master
-  
-test:
-  stage: test
-  script:
-    - stack --system-ghc exec blog build
-  only:
-    - develop
