@@ -8,4 +8,4 @@ David is a telecom engineer with lots of knowledge itches. Life is scratching ti
 
 Maybe he can make good use of this blog and write something useful, or whatever comes to his mind.
 
-  - [__CV (English)__](./CV-en.pdf)
+  - [__CV (English)__](./assets/CV-en.pdf)
