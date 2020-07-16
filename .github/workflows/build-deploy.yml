@@ -27,8 +27,8 @@ jobs:
       - run: stack --system-ghc build --only-dependencies
       - run: stack --system-ghc build --test --bench --no-run-tests --no-run-benchmarks
       - run: stack exec blog build
-      name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/master'
+        name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/master'
       - uses: crazy-max/ghaction-github-pages@v2
         with:
           target_branch: gh-pages
