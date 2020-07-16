@@ -27,11 +27,12 @@ jobs:
         with:
           path: |
             ~/.stack
+            .stack-work
             _cache
           key: ${{ runner.os }}-${{ matrix.ghc }}-stack
       - run: stack --system-ghc build --only-dependencies
       - run: stack --system-ghc build --test --bench --no-run-tests --no-run-benchmarks
-      - run: stack exec blog build
+      - run: stack --system-ghc exec blog build
       -
         name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/master'
