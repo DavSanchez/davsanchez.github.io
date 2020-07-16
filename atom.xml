@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>DavSanchez</title>
+    <link href="/atom.xml" rel="self" />
+    <link href="" />
+    <id>/atom.xml</id>
+    <author>
+        <name>DavSanchez</name>
+        <email></email>
+    </author>
+    <updated>2019-09-12T00:00:00Z</updated>
+    <entry>
+    <title>Learn Go with Tests, really!</title>
+    <link href="/posts/2019-09-12-learn-go-with-tests-really.html" />
+    <id>/posts/2019-09-12-learn-go-with-tests-really.html</id>
+    <published>2019-09-12T00:00:00Z</published>
+    <updated>2019-09-12T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="blog-post">
+  <h2 class="blog-post-title">
+    Learn Go with Tests, really!
+  </h2>
+  <p class="blog-post-meta">
+    Posted on 2019-09-12
+    
+      by DavSanchez
+    
+  </p>
+  <p>So I’ve been trying to grow my programming language toolbelt a little bit these days, and I thought it would be a good idea to learn some Go.</p>
+<p>This programming language has been developed at Google with the aims of safety and simplicity. The compilation toolchain is really simple, and it has utilities such as testing, coverage and benchmarking already built-in in the language!</p>
+<p>If you are interested in learning this language, I cannot recommend <a href="https://quii.gitbook.io/learn-go-with-tests/">Learn Go with Tests</a> enough. This is an online book dedicated to teaching Go but with a strong focus on Test-Driven Development (TDD), a valuable skill for any software developer. The book really makes an emphasis on the TDD workflow, which, even if you don’t code Go ever again, will prove useful in your career.</p>
+<p>While some knowledge of the typical structures of programming is actually needed (variables, functions, <code>if</code> statements and that stuff), the book assumes no prior knowledge of Go itself.</p>
+<p>Currently I’m in the middle of the book’s proposed final project and I have learnt a lot! Give it a try, I hope it works out great for you too.</p>
+</div>
+]]></summary>
+</entry>
+<entry>
+    <title>Making your own blog with GitLab Pages and Hakyll</title>
+    <link href="/posts/2019-07-27-blog-gitlab-hakyll.html" />
+    <id>/posts/2019-07-27-blog-gitlab-hakyll.html</id>
+    <published>2019-07-27T00:00:00Z</published>
+    <updated>2019-07-27T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="blog-post">
+  <h2 class="blog-post-title">
+    Making your own blog with GitLab Pages and Hakyll
+  </h2>
+  <p class="blog-post-meta">
+    Posted on 2019-07-27
+    
+      by DavSanchez
+    
+  </p>
+  <p>So, I decided to give blogging a try and made a GitLab Pages site with the help of <a href="https://jaspervdj.be/hakyll/">Hakyll</a>, a static site generator written in Haskell. This post details how I configured it.</p>
+<p>To follow the instructions you need <a href="https://www.haskellstack.org/">a working <code>stack</code> installation</a> (and a <a href="https://gitlab.com/">GitLab</a> account, of course!)</p>
+<p>At the time of writing this post, the blog’s aesthetics are not so customized. I’m mostly using a fine-looking template I found. So, what did I do to make it work in GitLab Pages?</p>
+<h1 id="first-steps">First steps</h1>
+<p>First of all, I got <a href="https://github.com/stackbuilders/dr-hakyll">that template I was talking about</a>, which includes Bootstrap and support for RSS/Atom:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="fu">git</span> clone https://github.com/stackbuilders/dr-hakyll</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="bu">cd</span> dr-hakyll</span></code></pre></div>
+<h1 id="modifying-the-project-configuration">Modifying the project configuration</h1>
+<p>Then, what I did was modifying a little bit the HTML partials in the <code>templates</code> directory and customizing the <code>.cabal</code> file, which I also renamed to <code>blog.cabal</code>. The name used in the <code>.cabal</code> file’s <code>name</code> field would be the name of the executable program via <code>stack</code>. This is the content:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="fu">name</span><span class="kw">:</span><span class="at">               blog</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a><span class="fu">version</span><span class="kw">:</span><span class="at">            </span><span class="fl">0.1.0</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a><span class="fu">build-type</span><span class="kw">:</span><span class="at">         Simple</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true"></a><span class="fu">cabal-version</span><span class="kw">:</span><span class="at">      &gt;= 1.10</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true"></a><span class="at">executable blog</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true"></a><span class="at">  </span><span class="fu">hs-source-dirs</span><span class="kw">:</span><span class="at">      app</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true"></a><span class="at">  </span><span class="fu">main-is</span><span class="kw">:</span><span class="at">             Main.hs</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true"></a><span class="at">  </span><span class="fu">ghc-options</span><span class="kw">:</span><span class="at">         -threaded</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true"></a><span class="at">  </span><span class="fu">build-depends</span><span class="kw">:</span><span class="at">       base &gt;= 4.7 &amp;&amp; &lt; 5</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true"></a><span class="at">                     , hakyll &gt;= 4.6 &amp;&amp; &lt; 5</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true"></a><span class="at">  </span><span class="fu">default-language</span><span class="kw">:</span><span class="at">    Haskell2010</span></span></code></pre></div>
+<h2 id="the-stack.yaml-file">The <code>stack.yaml</code> file</h2>
+<p>I also deleted the <code>stack.yaml</code> file to generate another one from scratch, as I had some problems in GitLab CI with the original file. To generate a new <code>stack.yaml</code> file, run the following command inside the project’s root directory:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="ex">stack</span> init</span></code></pre></div>
+<p><code>stack</code> will then check the <code>.cabal</code> file present in the directory and will generate a new <code>stack.yaml</code> file with the best snapshot available. The snapshot selected is indicated in the <code>resolver</code> field, as follows:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="fu">resolver</span><span class="kw">:</span><span class="at"> lts-12.26</span></span></code></pre></div>
+<p>Take into account that the <code>resolver</code> indicates a specific version of the Haskell compiler, GHC. In my case, <code>lts-12.26</code> corresponds to GHC 8.4.4, which will be used later on for setting up GitLab’s CI service.</p>
+<h2 id="preparing-the-gitlab-repo">Preparing the GitLab repo</h2>
+<p>While you are modifying all these files, you can also prepare your git repository for these contents, like setting the GitLab remote to upload the working directory, renaming the project directory to suit your needs, or adding a <a href="https://github.com/github/gitignore/blob/master/Haskell.gitignore">specific <code>.gitignore</code> file for Haskell code</a>.</p>
+<p>If you want the blog to be available from your “root URL” you should create a repository called <code>&lt;username&gt;.gitlab.io</code>. If you don’t do this, the blog URL will be <code>&lt;username&gt;.gitlab.io/&lt;repo-name&gt;</code>.</p>
+<h1 id="modifying-app-defaults">Modifying app defaults</h1>
+<p>Since GitLab Pages’ static content has to be served in the <code>public</code> directory, I added the following code at the end of <code>app/Main.hs</code> to modify the field <code>destinationDirectory</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="ot">config ::</span> <span class="dt">Configuration</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a>config <span class="ot">=</span> defaultConfiguration</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true"></a>  { destinationDirectory <span class="ot">=</span> <span class="st">&quot;public&quot;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true"></a>  }</span></code></pre></div>
+<p>At the beginning of the same file, after <code>main =</code>, replace <code>hakyll $ do</code> with <code>hakyllWith config $ do</code>. This references the <code>config</code> function defined above.</p>
+<h1 id="instructing-gitlab-ci-to-build-the-site">Instructing GitLab CI to build the site</h1>
+<p>To deploy statically generated sites, GitLab uses its CI service. This service can be configured creating a <code>.gitlab-ci.yml</code> file located in the project’s root directory.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="fu">image</span><span class="kw">:</span><span class="at"> haskell:8.4.4</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a><span class="fu">before_script</span><span class="kw">:</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a><span class="at">  </span><span class="kw">-</span><span class="at"> stack --system-ghc build</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true"></a><span class="fu">pages</span><span class="kw">:</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true"></a><span class="at">  </span><span class="fu">stage</span><span class="kw">:</span><span class="at"> deploy</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true"></a><span class="at">  </span><span class="fu">script</span><span class="kw">:</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true"></a><span class="at">  </span><span class="kw">-</span><span class="at"> stack --system-ghc exec blog build</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true"></a><span class="at">  </span><span class="fu">artifacts</span><span class="kw">:</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true"></a><span class="at">    </span><span class="fu">paths</span><span class="kw">:</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true"></a><span class="at">    </span><span class="kw">-</span><span class="at"> public</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true"></a><span class="at">  </span><span class="fu">only</span><span class="kw">:</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true"></a><span class="at">  </span><span class="kw">-</span><span class="at"> master</span></span></code></pre></div>
+<ul>
+<li>The <code>image</code> field specifies the Haskell image used to execute the Haskell program which will generate the static files</li>
+<li>The <code>before_script</code> field executes <code>stack build</code> with the image’s GHC (same version as the <code>stack.yaml</code>’s <code>resolver</code> field)</li>
+<li>The <code>pages</code> field specifies the <code>stack</code> execution of the Haskell program (in the <code>script</code> field) for a specific stage (<code>stage</code> field), with the <code>artifacts</code> field being the publicly available directory of our project.</li>
+<li>The <code>only</code> field specifies the branch on which the CI job will act. In my case, I put the <code>master</code> branch. This is useful if for example you test changes in a <code>develop</code> branch and don’t want the CI to try to build the page on every commit to that branch, only building when you merge changes into <code>master</code>.</li>
+</ul>
+<h1 id="deploying-the-site">Deploying the site</h1>
+<p>If you commit all these changes and push to your GitLab remote, the CI will launch a job with the configuration. If it succeeds, you will be able to access your new blog!</p>
+<p>The process of building the static site with Haskell is a little slow, though. I recommend increasing the job’s running time to 2 hours (in your GitLab project, <strong>Settings &gt; CI / CD &gt; General pipelines &gt; Timeout: <code>2h</code></strong>), just in case.</p>
+<p>Remember, the actual URL will depend on your GitLab remote’s name. If you want the blog to be available on <code>&lt;username&gt;.gitlab.io</code> you should create a repository with that name. Otherwise, the blog URL will be <code>&lt;username&gt;.gitlab.io/&lt;repo-name&gt;</code>.</p>
+<h2 id="testing-locally">Testing locally</h2>
+<p>If you want to set up a local server to check the changes before pushing into <code>master</code>, you can do it with the following commands from the project’s root directory, assuming you wrote <code>executable blog</code> in your <code>.cabal</code> file (check above):</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true"></a><span class="ex">stack</span> setup</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true"></a><span class="ex">stack</span> build</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true"></a><span class="ex">stack</span> exec blog build</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true"></a><span class="ex">stack</span> exec blog watch</span></code></pre></div>
+<p>This will set up a simple <code>warp</code> web server, serving the generated files (present on the <code>public</code> directory) in your <code>localhost:8000</code> (the terminal will indicate the port used). You can interrupt the server with <code>Ctrl+C</code>.</p>
+<p>Additionally, you can remove the generated static files and rebuild the project with</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true"></a><span class="ex">stack</span> exec blog clean</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true"></a><span class="ex">stack</span> exec blog build</span></code></pre></div>
+<p>or with</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a><span class="ex">stack</span> exec blog rebuild</span></code></pre></div>
+<p>If you modify <code>Main.hs</code>, you’ll need to do <code>stack build</code> again and then run <code>stack exec blog rebuild</code> to regenerate the static files.</p>
+<h1 id="adding-syntax-highlighting">Adding syntax highlighting</h1>
+<p>To add syntax highlighting to your code blocks, you just need to add specific CSS files. <a href="https://github.com/tejasbubane/hakyll-css">This repo</a> has some CSS files with different themes, so you can use whichever you like, drop it in your <code>css</code> directory, and reference it in the <code>default.html</code> template file to get that nice colors in your code!</p>
+</div>
+]]></summary>
+</entry>
+<entry>
+    <title>Welcome to my blog!</title>
+    <link href="/posts/2019-07-26-welcome.html" />
+    <id>/posts/2019-07-26-welcome.html</id>
+    <published>2019-07-26T00:00:00Z</published>
+    <updated>2019-07-26T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="blog-post">
+  <h2 class="blog-post-title">
+    Welcome to my blog!
+  </h2>
+  <p class="blog-post-meta">
+    Posted on 2019-07-26
+    
+      by DavSanchez
+    
+  </p>
+  <p>Hello there. This is my <em>n</em>-th attempt at making a personal blog for my technical musings. Hope it lasts!</p>
+<blockquote>
+<p><em>No one can have virtues without exerting them in time and place.</em></p>
+<p><strong>— Meister Eckhart</strong></p>
+</blockquote>
+</div>
+]]></summary>
+</entry>
+
+</feed>
