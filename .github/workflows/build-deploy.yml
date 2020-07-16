@@ -11,8 +11,10 @@ jobs:
         stack: ["2.3.1"]
     steps:
       - 
-        name: Checkout and setup
+        name: Checkout
         uses: actions/checkout@v2.3.1
+      -
+        name: Setup Haskell
         uses: actions/setup-haskell@v1.1.2
         with:
             ghc-version: ${{ matrix.ghc }}
