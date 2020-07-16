@@ -9,8 +9,6 @@ jobs:
         cabal: ["3.2"]
         ghc: ["8.8.3"]
         stack: ["2.3.1"]
-    env:
-      CONFIG: "--enable-tests --enable-benchmarks"
     steps:
       - uses: actions/checkout@v2.3.1
       - uses: actions/setup-haskell@v1.1.2
@@ -29,10 +27,11 @@ jobs:
       - run: stack --system-ghc build --only-dependencies
       - run: stack --system-ghc build --test --bench --no-run-tests --no-run-benchmarks
       - run: stack exec blog build
-        if: github.ref == 'refs/heads/master'
-        name: Deploy to GitHub Pages
+      name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/master'
       - uses: crazy-max/ghaction-github-pages@v2
         with:
           target_branch: gh-pages
           build_dir: public
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
