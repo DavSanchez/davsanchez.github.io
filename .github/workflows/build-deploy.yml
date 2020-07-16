@@ -35,7 +35,7 @@ jobs:
       - run: stack --system-ghc exec blog build
       -
         name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/build-page'
+        if: github.ref == 'refs/heads/deploy-pages'
         uses: crazy-max/ghaction-github-pages@v2
         with:
           target_branch: master
