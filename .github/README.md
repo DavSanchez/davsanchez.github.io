@@ -1,21 +1,8 @@
-# emanote-template
+# David's Personal Website
 
-A template repository to create your own Markdown-based [Emanote](https://github.com/srid/emanote) notebook with [Visual Studio Code](https://code.visualstudio.com/) support, as well as to publish it to GitHub Pages.
+This repository contains the source code and content for my personal website and blog, where I document my learning journey and share technical insights on Nix, Haskell, Rust, and more.
 
-See <https://emanote.srid.ca/emanote-template> for details.
-
-## Using this template
-
-Click the "Use this template" green button on Github, and in the resulting repository make the following modifications,
-
-1. Change `index.yaml` to use your site's title (and set the same in `index.md`) and a suitable edit URL.
-1. Start adding `.md` notes at repository root (you can use VSCode or [Obsidian](https://emanote.srid.ca/obsidian))
-
-If deploying using GitHub Pages, also:
-
-1. Change `flake.nix` to set the `baseUrl` (if your repository is named differently or you are using a CNAME).
-
-Checkout [examples](https://emanote.srid.ca/examples) and [guide](https://emanote.srid.ca/guide) for next steps.
+The site is built using [Emanote](https://emanote.srid.ca/) and hosted on GitHub Pages at [blog.tech.davidslt.es](https://blog.tech.davidslt.es).
 
 ## Running using Nix
 
