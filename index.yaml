@@ -6,14 +6,6 @@ page:
 
   siteUrl: blog.tech.davidslt.es
 
-  headHtml: |
-    <snippet var="js.highlightjs" />
-    <with var="js">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/${value:highlightjs-ver}/languages/rust.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/${value:highlightjs-ver}/languages/go.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/${value:highlightjs-ver}/languages/shell.min.js"></script>
-    </with>
-
 template:
   theme: blue
 
@@ -22,13 +14,17 @@ template:
   editBaseUrl: https://github.com/DavSanchez/davsanchez.github.io/edit/master
 
   # Uncomment this to get neuron-style pages
-  # name: /templates/layouts/note
-  # layout:
-  #   note:
-  #     containerClass: container mx-auto max-w-screen-lg
-
+  uptree:
+    enable: true
   sidebar:
+    enable: true
     collapsed: false
+  toc:
+    enable: true
+  breadcrumbs:
+    enable: true
+  # base:
+  #   containerClass: container mx-auto max-w-screen-lg
 
   # If you are hosting on GitLab Pages, you may want to remove this.
   urlStrategy: pretty

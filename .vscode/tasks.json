@@ -5,7 +5,7 @@
     "tasks": [
         {
             "label": "Emanote Live Server",
-            "type": "process",
+            "type": "shell",
             "command": "nix",
             "args": [
                 "run"
