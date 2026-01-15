@@ -21,7 +21,7 @@
     "files.associations": {
         "*.tpl": "html"
     },
-    "pasteImage.insertPattern": "![](${imageFilePath})",
+    "pasteImage.insertPattern": "![[${imageFilePath}]]",
     "search.exclude": {
         ".direnv": true
     }

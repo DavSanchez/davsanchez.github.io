@@ -1,8 +1,8 @@
 {
-  # nixConfig = {
-  #   extra-substituters = "https://cache.garnix.io";
-  #   extra-trusted-public-keys = "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=";
-  # };
+  nixConfig = {
+    extra-substituters = "https://cache.nixos.asia/oss";
+    extra-trusted-public-keys = "oss:KO872wNJkCDgmGN3xy9dT89WAhvv13EiKncTtHDItVU=";
+  };
 
   inputs = {
     emanote.url = "github:srid/emanote";
@@ -11,27 +11,47 @@
     flake-parts.follows = "emanote/flake-parts";
   };
 
-  outputs = inputs@{ self, flake-parts, nixpkgs, ... }:
+  outputs =
+    inputs@{
+      self,
+      flake-parts,
+      nixpkgs,
+      ...
+    }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = nixpkgs.lib.systems.flakeExposed;
       imports = [ inputs.emanote.flakeModule ];
-      perSystem = { self', pkgs, system, ... }: {
-        emanote = {
-          # By default, the 'emanote' flake input is used.
-          # package = inputs.emanote.packages.${system}.default;
-          sites."default" = {
-            layers = [{ path = ./.; pathString = "."; }];
-            # port = 8080;
-            baseUrl = "/"; # Change to "/" (or remove it entirely) if using CNAME
-            # prettyUrls = true;
+      perSystem =
+        { pkgs, ... }:
+        {
+          emanote = {
+            # By default, the 'emanote' flake input is used.
+            # package = inputs.emanote.packages.${system}.default;
+            sites = rec {
+              # For available options, see:
+              # https://github.com/srid/emanote/blob/master/nix/modules/flake-parts/flake-module/site/default.nix
+              default = {
+                layers = [
+                  {
+                    path = ./.;
+                    pathString = ".";
+                  }
+                ];
+                # port = 8080;
+              };
+              # Optimized for deploying to https://<user>.github.io/<repo-name> URLs
+              github-io = default // {
+                check = false;
+                extraConfig.template.baseUrl = "/";
+              };
+            };
           };
+          devShells.default = pkgs.mkShell {
+            buildInputs = [
+              pkgs.nixpkgs-fmt
+            ];
+          };
+          formatter = pkgs.nixpkgs-fmt;
         };
-        devShells.default = pkgs.mkShell {
-          buildInputs = [
-            pkgs.nixpkgs-fmt
-          ];
-        };
-        formatter = pkgs.nixpkgs-fmt;
-      };
     };
 }
