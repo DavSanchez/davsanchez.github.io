@@ -2,6 +2,10 @@
 title: "Installing x86-64 Nix packages on Apple Silicon Macs"
 short-title: "x86_64 Nix Packages on M1"
 date: 2022-12-04
+tags:
+  - nix
+  - tech
+  - 🇬🇧
 ---
 
 > ## 2023-03-25 EDIT
