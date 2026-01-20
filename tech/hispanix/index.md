@@ -2,6 +2,10 @@
 title: "HispaNix: Recursos de Nix para hispanohablantes"
 short-title: HispaNix
 date: 2024-06-05
+tags:
+  - nix
+  - tech
+  - 🇪🇸
 ---
 <!-- LTeX: language=es -->
 
@@ -9,12 +13,10 @@ Tras un buen tiempo explorando y utilizando [Nix/NixOS](https://nixos.org), no h
 
 No sé si podré mantener un ritmo constante, pero peor sería no intentarlo. De momento, iré empezando con una introducción en mi próxima entrada en español y ya veremos a dónde nos lleva.
 
-Además, he solicitado [la creación de un espacio para hispanohablantes](https://discourse.nixos.org/t/nix-resources-for-spanish-speakers/44924) en el canal [internacional](https://matrix.to/#/#international:nixos.org) de la instancia de NixOS en Matrix.
-
 Nos vemos en las próximas entradas.
 
 ## Items
 
 ```query
-path:blog/hispanix/*
+path:tech/hispanix/*
 ```

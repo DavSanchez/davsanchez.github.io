@@ -2,6 +2,10 @@
 title: "Go: nil interfaces vs interfaces with nil value"
 short-title: "Go and nil interfaces"
 date: 2023-05-06
+tags:
+  - go
+  - tech
+  - 🇬🇧
 ---
 
 This is a known gotcha, so let this serve as a reminder, refresher or a warning for newcomers to Go.
@@ -137,4 +141,7 @@ You can test this in the [Go Playground](https://go.dev/play/p/XG00TeGaOlZ)
 
 Be careful out there! If you follow the rule of "take interfaces, return concrete types", as the [ireturn](https://github.com/butuzov/ireturn) linter will enforce, take this into account when testing an interface variable for `nil`.
 
-Additional reading [here](https://glucn.medium.com/golang-an-interface-holding-a-nil-value-is-not-nil-bb151f472cc7) and [here](http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/index.html#nil_in_nil_in_vals).
+Additional reading:
+
+- <https://glucn.medium.com/golang-an-interface-holding-a-nil-value-is-not-nil-bb151f472cc7>
+- <http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/index.html#nil_in_nil_in_vals>

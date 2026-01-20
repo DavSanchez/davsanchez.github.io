@@ -1,10 +1,14 @@
 ---
 title: "Entornos de desarrollo reproducibles con Nix"
 date: 2024-06-26
+tags:
+  - nix
+  - tech
+  - 🇪🇸
 ---
 <!-- LTeX: language=es -->
 
-![](./nix.png)
+![Imagen de cabecera del repositorio de Nix en GitHub](./nix.png)
 
 Tras la introducción a Nix que vimos en el [artículo anterior](./2024-06-16-conociendo-nix.md), continuamos con uno de los casos de uso más potentes de esta herramienta.
 

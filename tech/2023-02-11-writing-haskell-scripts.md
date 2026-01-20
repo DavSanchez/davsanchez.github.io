@@ -2,6 +2,11 @@
 title: "Writing single-file Haskell scripts using Cabal and Nix"
 short-title: "Nix Haskell scripts"
 date: 2023-02-11
+tags:
+  - nix
+  - haskell
+  - tech
+  - 🇬🇧
 ---
 
 This has been already covered in other articles and documentations, but I always forget them and waste so much time looking for the info when I need it, so I'll note it down here for future reference.
