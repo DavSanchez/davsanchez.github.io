@@ -2,7 +2,7 @@
 
 This repository contains the source code and content for my personal website and blog, where I document my learning journey and share technical insights on Nix, Haskell, Rust, and more.
 
-The site is built using [Emanote](https://emanote.srid.ca/) and hosted on GitHub Pages at [blog.tech.davidslt.es](https://blog.tech.davidslt.es).
+The site is built using [Emanote](https://emanote.srid.ca/) and hosted on GitHub Pages at [davidslt.es](https://davidslt.es).
 
 ## Running using Nix
 
