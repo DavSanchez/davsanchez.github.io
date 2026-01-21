@@ -52,7 +52,10 @@ What do you think will be the output from this?
 example1.thing is NOT nil!
 ```
 
-Although the value is `nil`, the `nil` is of type `*thing`. **An interface is `nil` only when both its value and its type are `nil`.**
+Although the value is `nil`, the `nil` is of type `*thing`!
+
+> [!tip]
+> An interface,thus,  is `nil` only when both its value and its type are `nil`.
 
 This, on the other hand, would evaluate to true in the above check:
 
