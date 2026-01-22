@@ -21,11 +21,13 @@ tags:
 > Transparencia referencial, inmutabilidad, evaluación perezosa, programación por tipos, mónadas,
 > cálculo lambda y otros amigos.
 
-Siempre me atrajo la programación funcional con **Haskell**.
+Siempre me atrajo la programación funcional propuesta por **Haskell**.
 
 Programar utilizando propiedades matemáticas, de forma declarativa y con las dependencias
 explícitas, ver cómo encajan todas las piezas (y el compilador acepta el programa) cuando tu modelo
-de tipos se ajusta al problema, notar cómo tu entendimiento mejora en el proceso. Otra historia.
+de tipos se ajusta al problema, notar cómo tu entendimiento mejora en el proceso.
+
+Otra historia.
 
 Como también me pasa con **Nix**, toda aquella pieza de tecnología con estos principios —a menudo
 tras curvas de aprendizaje popularmente elevadas—, que prometa a cambio una mejor perspectiva sobre
@@ -43,16 +45,13 @@ Creo que soy mejor programador gracias a ellas.
 
 Algunos miembros del equipo de Agent Control en New Relic tenemos un club de lectura semanal.
 Hace unos meses seleccionamos **Crafting Interpreters** de Robert Nystrom (puedes leerlo
-gratis en [su web](<https://www.craftinginterpreters.com>)) como lectura, en gran parte por ser de
-naturaleza más práctica que las lecturas anteriores
-([**Rust for Rustaceans**](https://rust-for-rustaceans.com) de Jon Gjenset y
-[**Asynchronous Programming in Rust**](https://www.packtpub.com/en-us/product/asynchronous-programming-in-rust-9781805128137)
-de Carl Fredrik Samson).
+gratis en [su web](<https://www.craftinginterpreters.com>)), en gran parte por ser de naturaleza más
+práctica que las lecturas anteriores ([**Rust for Rustaceans**](https://rust-for-rustaceans.com) de
+Jon Gjenset y [**Asynchronous Programming in Rust**](https://www.packtpub.com/en-us/product/asynchronous-programming-in-rust-9781805128137) de Carl Fredrik Samson).
 
-El libro implementa un lenguaje de programación orientada a objetos simple llamado **Lox**
-dos veces, con estrategias y lenguajes diferentes cada vez.
-Primero en Java (`jlox`) mediante recorrido de árboles,
-luego en C (`clox`) como una máquina virtual de _bytecode_.
+El libro implementa un lenguaje de programación orientada a objetos simple llamado **Lox**. Lo hace
+dos veces, con estrategias y lenguajes diferentes cada vez. Primero en Java (`jlox`) mediante
+recorrido de árboles, luego en C (`clox`) con una máquina virtual de _bytecode_.
 
 Como no queríamos hacer la primera parte en Java (xd) cada uno de nosotros escogió su propio
 lenguaje para la primera parte del libro.
@@ -67,18 +66,21 @@ Este artículo explora varios aspectos de mi implementación de `jlox` en Haskel
 > Pasa toda la _suite_ de tests del repositorio oficial de Crafting Interpreters (más sobre esto a
 > continuación) para `jlox`, por lo que es conforme a lo especificado en el libro.
 
+Vamos allá.
+
 ## Entorno reproducible con Nix
 
+Te lo dije.
+
 Haskell utiliza [`cabal`](https://www.haskell.org/cabal/) como gestor de proyectos. Creo que, aún
-con sus asperezas, es una herramienta muy buena. Sin embargo, como ya decía al principio, me gustan
-mis dependencias controladas y descritas lo más completamente posible. #nix es un viejo conocido en
-este sitio, y por descontado la mejor herramienta a día de hoy para encargarse de eso.
+con sus asperezas, es una herramienta bastante buena. Sin embargo, como ya decía al principio,
+me gustan mis dependencias controladas y descritas lo más completamente posible. #nix es un viejo conocido en este sitio, y por descontado la mejor herramienta a día de hoy para encargarse de eso.
 
 Así que antes de escribir mi primera línea de Haskell me aseguré de que mi entorno de desarrollo
 fuese un [_flake_](./hispanix/2024-06-25-entornos-desarrollo.md) en condiciones.
 Con el _flake_ pude establecer algunos aspectos que quería desde el minuto uno:
 
-- La versión del compilador que me interesaba 
+- La versión del compilador que me interesaba
 (GHC 9.12.2, para probar las extensiones de [GHC2024](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/control.html#extension-GHC2024))
 - Un formateador "único" para todos los tipos de fuentes del proyecto con
 [`treefmt`](https://github.com/numtide/treefmt).
@@ -90,100 +92,407 @@ Más relevante que todos estos aspectos para comprender la potencia de Nix es el
 para ejecutar los tests del [repositorio](https://github.com/munificent/craftinginterpreters) de
 Crafting Interpreters.
 
-TODO SIGUE AQUI
+El código de los bancos de tests está escrito en Dart 2, y desde 2023 Dart está en la versión 3.
+Dart 3 obliga a asegurar la _Null Safety_, cosa que los tests no habían hecho porque la versión 2 no
+lo requiere, así que estos tests no funcionan con la última versión. Si fuese un programador de Dart
+y tuviese instalada la versión 3 tendría que pelear con mi entorno para instalar la versión 2 y
+poder ejecutar los tests sin alterar mi entorno habitual.
+Tal vez alguna herramienta tipo `nvm` para Dart, `asdf` o contenedores...
 
-Aquí hubo un reto interesante: los tests originales de *Crafting Interpreters* fueron escritos para **Dart 2 (2.19.6 o menor)**, pero la versión actual en Nixpkgs al momento de escribir esto es la **3.9.4**, con la cual los tests no ejecutan.
+Pero como uso Nix, no tengo que preocuparme de este problema en absoluto. No tengo que conocer
+herramientas específicas para el lenguaje de turno ni arriesgarme a conflictos con herramientas
+instaladas globalmente (un saludo, Python).
 
-En un entorno tradicional, esto significaría instalar versiones antiguas de Dart globalmente, arriesgando conflictos o teniendo que usar gestores de versiones complejos (`asdf`, `nvm`, etc.). **Con Nix, el problema desaparece.**
+Busco Dart en el repositorio de paquetes más grande y más actualizado del mundo, `nixpkgs`. Busco
+la revisión de `git` de `nixpkgs` que contenga la versión de Dart que me sirve. Fijo la revisión
+como entrada a mi _flake_... y listo, **Dart 2.19.6** listo para ejecutar en mi terminal. Gracias a
+`direnv`, en el momento en el que salgo del directorio del proyecto el ejecutable de `dart`
+desaparece (o volvería a la 3.9.4 si fuese un programador de Dart con una instalación global).
 
-Simplemente añadí una entrada en mis `inputs` apuntando a un commit específico de nixpkgs de hace unos años que contenía **Dart 2.19.6**. De esta forma, cuando entro en mi *shell* de desarrollo (`nix develop`), tengo disponible esa versión exacta de Dart, junto con GHC y mis herramientas. **En el momento en que salgo de esa shell, todo desaparece.**
+De nuevo, tirando de las funciones de Nix escribo un _script_, también en Haskell, (**_inline!_**)
+que llama a Dart como si fuese un _script_ de Bash, de forma que puedo ejecutar los tests de cada
+capítulo de forma aislada y pasándole mi implementación del intérprete.
 
-Mi ordenador sigue limpio, sin versiones conflictivas de Python, Ruby o Dart peleándose entre sí. Es la higiene definitiva para el desarrollador: dependencias aisladas, reproducibles y efímeras por proyecto.
-
-Lo más potente es cómo orquesto estos tests. En lugar de un script de Bash frágil, utilizo `pkgs.writers.writeHaskellBin` para escribir un **script de Haskell inline dentro de mi propio `flake.nix`**:
+¿Cómo? mira esto (sacado del repo de [Shh](https://github.com/luke-clifton/shh#nix)):
 
 ```nix
-# flake.nix (extracto)
-crafting-interpreters-script = interpreter:
-  pkgs.writers.writeHaskellBin "crafting-interpreters-script" {
-    libraries = [ pkgs.haskellPackages.shh ... ];
-  } ''
-    {-# LANGUAGE TemplateHaskell #-}
-    import Shh
-    -- ... código Haskell real ...
-    main :: IO ()
-    main = do
-       -- Lógica compleja de tests, descarga de repos, ejecución de dart...
-       dart "tool/bin/test.dart" target "--interpreter" ...
-  '';
+writers.writeHaskellBin "example" { libraries = [ haskellPackages.shh ]; } ''
+  {-# LANGUAGE TemplateHaskell #-}
+  import Shh
+
+  -- Load binaries from Nix packages. The dependencies will be captured
+  -- in the closure.
+  loadFromBins ["${git}", "${coreutils}", "${curl}"]
+
+  main :: IO ()
+  main = do
+    cat "/a/file"
+    cp "/a/file" "/b/file"
+''
 ```
 
-Esto significa que tengo toda la potencia de Haskell (tipado estático, librerías como `shh` para shell scripting) disponible *dentro* de mi definición de infraestructura. Es un nivel de control y robustez que Bash simplemente no puede ofrecer.
+Fíjate en el comentario del centro. Hasta la versión de las `coreutils` está fijada por Nix.
 
-Esto me dio una confianza absoluta: si mi intérprete pasaba los tests oficiales, mi lógica era correcta, independientemente del lenguaje.
+Es un nivel de control inigualable, no vuelves a mirar (ni a ejecutar) un _script_ de Bash igual.
 
-## 2. Adiós Visitor, Hola Pattern Matching
+Por supuesto, automatizar la ejecución de estos tests en la CI (mismas versiones de programas, etc,
+etc) es trivial. Esto da confianza absoluta: puedo saber si mi implementación actual supera los
+tests oficiales y seleccionar granularmente cuántos y cuáles capítulos compruebo, independientemente del lenguaje que haya escogido.
 
-En la implementación Java, Nystrom usa el **Visitor Pattern** para recorrer el Árbol de Sintaxis Abstracta (AST). Es el mecanismo estándar en OOP para separar algoritmos de estructuras de datos, aunque conlleva una verbosidad inherente en su implementación.
+Escribí mi CI para que cada _pull request_ al repositorio implementando un capítulo
+debiese pasar todos los tests de dicho capítulo. Nada de medias tintas.
 
-En Haskell, este patrón es redundante. El uso de **Tipos de Datos Algebraicos (ADTs)** junto con **Pattern Matching** permite una expresión mucho más directa del comportamiento.
+Si quieres verlo, echa un vistazo a mi [`flake.nix`](https://github.com/DavSanchez/hox/blob/1eb3f09d00cf3f1c627bfddd2963441cb2dadef2/flake.nix#L48-L127).
 
-Mi AST de expresiones (`Expression.hs`) se ve así:
+## Escaneando: de la mutabilidad a la recursión de cola
+
+El primer paso de cualquier intérprete es el escáner (o _lexer_). En Java, Nystrom usa estructuras
+habituales, `while`s que avanzan sobre la cadena de caracteres de entrada, mutando el estado en cada
+iteración (`while (!isAtEnd()) { start = current; ... }`).
+
+¿Cómo te aproximas a esto en Haskell, donde casi todo es inmutable y no hay estado? No es cuestión de tirar de `map` o `foldl` sobre listas de caracteres, porque
+puedes necesitar más que un carácter cada vez para determinar ante qué _token_ te
+encuentras. Cuando llegas a `=` necesitas más para saber si estás ante un **signo
+de igual** o ante un **operador lógico** `==`.
+
+La respuesta a que no haya estado mutable es **llevar el estado contigo en la función**, llamándola recursivamente y pasando explícitamente el estado
+actualizado. ¿Te suena lo de las dependencias
+explícitas?.
+
+Este es el tipo de mi función de escaneo en Haskell.
+
+> [!info] _First time?_
+> Si nunca has visto una firma de tipos de
+> Haskell, asume que todos los tipos que aparecen excepto el último son parámetros de la función,
+> y el tipo que aparece al final es el tipo de retorno.
+>
+> Para saber más, lee sobre el [_currying_](https://en.wikipedia.org/wiki/Currying).
 
 ```haskell
-data Expression (p :: Phase)
-  = Literal Literal
-  | BinaryOperation Int BinaryOperator (Expression p) (Expression p)
-  | VariableExpr Int String (ResolutionInfo p)
-  -- ...
+-- | Scans the input strings and tracks the state: the current line number and the accumulated tokens
+naiveScanTokens ::
+  -- | Input string (a linked list of characters, `String` == `[Char]`)
+  [Char] ->
+  -- | Current line number
+  Int ->
+  -- | Accumulated tokens (my state!)
+  [TokenResult] -> 
+  -- | Resulting list of tokens, a non-empty list, can contain scanning errors
+  NonEmpty TokenResult
 ```
 
-El intérprete se reduce a una función que despacha sobre los constructores del tipo. Es una solución más concisa que evita la dispersión lógica de las clases *visitor* del modelo original.
+> [!note] ¿Naíf?
+> La función se llama `naiveScanTokens` porque inicialmente exploré, aparte de
+> esta versión literalmente escrita caso a caso según leía, otra versión utilizando
+> _combinadores monádicos_ (ya, ya. Sigue leyendo) y la biblioteca
+> [`megaparsec`](https://hackage.haskell.org/package/megaparsec).
+>
+> Finalmente descarté esta segunda opción por una cuestión didáctica a varios niveles:
+>
+> - Calentamiento después de un par de meses sin tocar Haskell.
+> - No usar bibliotecas externas en la implementación.
+> - La sección de _parsing_ ya me permitiría usar, también manualmente, los combinadores.
+> - Introducir algunos patrones de programación funcional y Haskell a mis compañeros de equipo.
+> - Escribir este artículo algún día.
 
-## 3. El Escáner: De Java a Haskell
-
-El primer paso de cualquier intérprete es el escáner (o lexer). En Java, Nystrom implementa un bucle `while` que avanza un puntero sobre la cadena de entrada, carácter por carácter, con mucha gestión de estado mutable (`current`, `start`, `line`).
-
-En Haskell, el enfoque natural es recursivo. Mi función `naiveScanTokens` consume la lista de caracteres de entrada y acumula tokens:
+La implementación simplemente hace _pattern matching_ sobre los caracteres de entrada y llama a la
+misma función actualizando el estado hasta que termina. Fíjate en cómo capturo cada carácter y cómo
+vinculo el resto de la lista a `ss` con el operador `:` en los argumentos de entrada, en el lado
+izquierdo de la definición, para pasarla a la nueva llamada en el lado derecho, y cómo en el caso
+base añado del estado de entrada (el argumento `tt`) el token `EOL` a la lista de salida (por eso
+nunca está vacía) con `:|`.
 
 ```haskell
-naiveScanTokens :: String -> Int -> [TokenResult] -> NonEmpty TokenResult
--- Caso base: fin de la entrada
+-- We start with the base case: no more characters to process, I just add the EOF token
 naiveScanTokens "" l tt = validToken EOF l :| tt
--- Tokens simples
 naiveScanTokens ('(' : ss) l tt = naiveScanTokens ss l (validToken LEFT_PAREN l : tt)
--- Comentarios: consumimos hasta el salto de línea
-naiveScanTokens ('/' : '/' : ss) l tt = naiveScanTokens (dropWhile (/= '\n') ss) l tt
+naiveScanTokens (')' : ss) l tt = naiveScanTokens ss l (validToken RIGHT_PAREN l : tt)
 -- ...
+-- Operators
+naiveScanTokens ('!' : '=' : ss) l tt = naiveScanTokens ss l (validToken BANG_EQUAL l : tt)
+naiveScanTokens ('!' : ss) l tt = naiveScanTokens ss l (validToken BANG l : tt)
+-- ...
+-- Whitespaces (no newlines)
+naiveScanTokens (s : ss) l tt
+  | s == ' ' || s == '\r' || s == '\t' =
+      naiveScanTokens ss l tt
+-- ... all other cases
+-- If we reach here, it means we encountered an unexpected character
+naiveScanTokens (s : ss) line tt = naiveScanTokens ss line (syntaxError "Unexpected character." line [s] : tt)
 ```
 
-Gracias al *Pattern Matching* sobre listas (`'(' : ss`), el código es casi una transcripción directa de la especificación léxica. No hay contadores manuales ni bucles `while`; la propia estructura de los datos guía el flujo.
+Tienes una función definida varias veces según los diferentes comportamientos que quieres.
+Es como sobrecargar una función por posibles sus valores de entrada.
 
-## 4. Parsers Artesanales: Combinadores Monádicos
+El código es casi una transcripción directa de las instrucciones del libro. Iba añadiendo los casos
+a la función según los leía, pero sin contadores manuales ni constructos de control
+de flujo `while` o `for`. Llamada Datos y estado de entrada, transformación, y
+nueva llamada con nuevos datos y estado.
 
-Frente al parser de descenso recursivo imperativo de Java, en Haskell opté por el uso de **Parser Combinators**.
+Solo hay que pasar un estado inicial (la primera línea y la lista vacía de resultados) junto a la
+entrada, que es lo que hago con `scanTokens` (esta solo tiene que aceptar el verdadero _input_):
 
-Aunque existen librerías consolidadas como Megaparsec, decidí implementar una mónada `Parser` propia. No por necesidad técnica, sino por el valor pedagógico de construir la abstracción desde sus cimientos. El objetivo era comprender la gestión del estado y la composición de errores sin capas intermedias.
+```haskell
+scanTokens :: String -> NonEmpty TokenResult
+scanTokens s = reverse (naiveScanTokens s 1 [])
+```
+
+Puedes ver la implementación completa de `naiveScanTokens` en mi repositorio ([`Scanner/Naive.hs`](https://github.com/DavSanchez/hox/blob/d318b821e162fcd548841b0f7f5d1a9bfd380169/src/Language/Scanner/Naive.hs#L100))
+
+## _Visitor_ vs _Pattern Matching_ de tipos suma
+
+La sección [_Working with trees_](https://www.craftinginterpreters.com/representing-code.html#working-with-trees)
+del capítulo 5 explora las diferencias expresivas entre el paradigma orientado a
+objetos y el paradigma funcional, y cómo el patrón de diseño _visitor_ trata de
+acercar el estilo funcional al orientado a objetos.
+
+Por supuesto, al acercarme al problema desde la programación puramente funcional,
+no iba a necesitar implementar el patrón _visitor_. Como el propio libro menciona:
+
+> Each kind of expression in Lox behaves differently at runtime. That means the
+> interpreter needs to select a different chunk of code to handle each expression
+> type. With tokens, we can simply switch on the TokenType. But **we don’t have a
+> “type” enum** for the syntax trees, just a separate Java class for each one.
+
+¡Nosotros sí que tenemos ese _“type” enum_!
+
+El sistema de tipos de Haskell es una de sus grandes fortalezas. En particular,
+tenemos a nuestra disposición los **ADTs** (_Algebraic Data Types_), y su forma
+de tipos suma (que también se ve en los `enum` de Rust) cubre este caso con total
+naturalidad, particularmente con la sintaxis de Haskell.
+
+La gramática formal para las expresiones de Lox empieza así, sacada tal cual
+del libro:
+
+```txt
+expression     → literal
+               | unary
+               | binary
+               | grouping ;
+```
+
+Y la primera versión de mi AST de expresión expresada como un tipo en Haskell
+se veía así:
+
+```haskell
+-- | Represents an expression in the AST.
+data Expression = Literal Literal
+                | Unary UnaryOperator Expression
+                | Binary BinaryOperator Expression Expression
+                | Grouping Expression
+```
+
+Hay información que falta en cada uno de los fragmentos, claro, pero imagino que
+pillas la idea 😎.
+
+El intérprete se reduce a una función que encaja cada patrón, como el escáner,
+pero esta vez sobre los constructores de variantes del tipo.
+Es una solución más concisa que evita escribir un puñado de clases sin métodos para
+implementar _visitor_, y por supuesto te ahorra escribir el generador que el autor
+tiene que fabricar para agilizar el añadido de dichas clases (son 21).
+
+Puedes ver mi tipo de expresión actual en [`Syntax/Expression.hs`](https://github.com/DavSanchez/hox/blob/d318b821e162fcd548841b0f7f5d1a9bfd380169/src/Language/Syntax/Expression.hs).
+
+## Parseando: combinadores monádicos
+
+Esta sección tiene un poco de miga, pero creo que es la que más puede mostrar la potencia de Haskell y la programación funcional a quienes no la conocen.
+
+La versión de Java del libro hace uso del descenso recursivo para implementar
+el _parser_. Aunque la idea es similar, yo iteré sobre el patrón del escáner y
+apreté un poco más la tuerca usando unas estructuras bastante potentes, los combinadores monádicos de _parsers_.
+
+Veamos de qué van.
+
+### ¿Qué es un _parser_?
+
+Un _parser_, al fin y al cabo, no es más que una **función** que acepta una entrada
+y devuelve una salida. Pero, ¿qué salida?:
+
+```haskell
+parser :: Input -> ?
+```
+
+En una versión muy simple, podemos tratar de procesar toda esa entrada y devolver
+nuestro resultado, que puede ser o bien tu tipo de salida (e.g. `Expression`)
+o un error (quizá pasamos una secuencia de _tokens_ sin ningún sentido).
+
+Como estamos en el mundo puro y matemático no queremos utilizar algo como
+excepciones que haya que capturar luego o dejar que maten al programa, aunque
+podemos. En la programación funcional pura y estáticamente tipada, **los errores
+también son valores**, y el tipo de las funciones contempla el tipo de errores que
+pueden emitir.
+
+Para codificar esto en la signatura de nuestra función hacemos uso, por supuesto,
+de ADTs. Un tipo con dos variantes, el éxito y el fallo:
+
+```haskell
+data ParseResult = Ok Output
+                 | Err ParseError
+```
+
+Generalizamos a cualquier tipo y obtenemos:
+
+```haskell
+data ParseResult e a = Ok a
+                     | Err e
+
+-- Parameterizing with our types
+type ParseResultAlias = ParseResult ParseError Output
+```
+
+Por supuesto, Haskell tiene ya tipos para representar esto. Tal y como Rust usa su
+tipo [`Result<T, E>`](https://doc.rust-lang.org/std/result/), aquí usamos `Either e a`.
+
+> [!info]
+> Rust y Haskell usan un orden distinto para los parámetros de tipo en `Result` y
+> `Either`. Esto es porque en Haskell nos suele interesar el poder _mapear_ sobre
+> el tipo que queda a la derecha.
+>
+> Puedes leer un poco al respecto en [este otro artículo](./2024-11-13-mapeando-estructuras.md).
+
+Así que el tipo de mi función _parser_ podría tener esta forma, generalizando sobre
+el tipo de entrada (que llamamos `s`), el tipo de salida (que llamamos `a`) y el
+tipo de error (que llamamos `e`):
+
+```haskell
+parser :: s -> Either e a
+```
+
+### ¿Cómo se _combinan_?
+
+Pero estábamos hablando de **combinadores**. ¿Qué es lo que combinamos? La
+respuesta es piezas de _parser_ (recuerda, funciones) más pequeñas.
+
+Pero si una función que consume toda la entrada es a su vez una combinación de
+_sub-funciones_, no tendría demasiado sentido que las funciones pequeñas
+consumieran toda la entrada. De ser así, solo una de ellas podría consumir la
+entrada, con el resto de las _sub-funciones_ operando sobre la salida de esta, y
+la combinación de la que hablamos sería simplemente una composición directa de
+funciones (e.g. `subParser3(subParser2(subParser1(input)))`).
+
+Si contemplamos más opciones que esta, entonces las _sub-funciones_, en general,
+no deben consumir toda la entrada.
+
+Entonces, ¿cómo expresamos que la entrada no ha sido consumida al completo
+en nuestras funciones?
+
+Pues así:
+
+```haskell
+parser :: s -> Either e (a, s)
+```
+
+Ahora la salida del caso de éxito de mi función es una _**tupla**_ que contiene dos tipos, el tipo de salida **y el resto de la entrada que falta por procesar**.
+
+> [!info]
+> En mi implementación [el tipo `Parser` no es exactamente así](https://github.com/DavSanchez/hox/blob/d318b821e162fcd548841b0f7f5d1a9bfd380169/src/Language/Parser.hs#L25-L27) debido a su capacidad de
+> [sincronización y recuperación de errores](https://www.craftinginterpreters.com/parsing-expressions.html#panic-mode-error-recovery), pero no necesitamos cubrir
+> ese aspecto para entender los combinadores monádicos en su forma básica.
+
+Aquí está la forma final que tendría un _parser_ totalmente genérico,
+encapsulado en una estructura que engloba un único tipo de valor (la función de
+_parsing_ en sí) y un alias para los tipos concretos con los que vamos a trabajar:
 
 ```haskell
 newtype Parser e s a = Parser
-  { runParser :: s -> (Either e a, s)
+  { runParser :: s -> Either e (a, s)
   }
+
+-- Parameterizing the input and the error, but not the output!
+type TokenParser a = Parser ParseError [Token] a
 ```
 
-La magia ocurre al implementar la instancia de `Alternative`. Esto nos permite definir la gramática de una forma casi declarativa usando el operador `<|>` (o):
+Entonces, estos combinadores irán consumiendo la entrada (`[Token]`) y devolverán el resultado (que puede ser o bien un tipo cualquiera `a` o un `ParseError`).
+
+Asumiendo una secuencia de _tokens_ que únicamente pueda formar una expresión
+válida, una combinación de estos _parsers_ recibiría la secuencia completa y
+acabaría con el valor `Right (Expression, [])`. El resultado con variante de la
+derecha (éxito) con mi valor de tipo `Expression` y la lista de _tokens_ consumida
+al completo.
+
+> [!tip] ¡Solo es un escáner!
+> Es importante que te quedes con la idea de que esto no es muy diferente a
+> lo que hice con el escáner, pero subiendo un poco el nivel de abstracción.
+>
+> Un escáner no es otra cosa que una función `[Char] -> Either SyntaxError ([Token], [Char])`
+> que consume toda la entrada de golpe, pero las llamadas recursivas intermedias sí
+> que pasan "lo que queda de la lista de caracteres" y a su vez
+> [emitían o un `validToken` o un `syntaxError`](https://github.com/DavSanchez/hox/blob/d318b821e162fcd548841b0f7f5d1a9bfd380169/src/Language/Scanner/Naive.hs#L12-L18)...
+> 😉.
+
+Llegados a este punto, ¿Cómo combinamos estos _parsers_ para generar mi
+`TokenParser Expression`?
+
+### La palabra que falta
+
+Podemos darle a nuestro tipo `Parser e s a` la capacidad de realizar cierta
+operación de encadenado con otros parsers de distintos tipos, de forma que cada
+_parser_ consuma un poco de la entrada, **y luego** el siguiente _parser_ consuma
+otro poco, y así hasta cuanto queramos. Nosotros determinaríamos cuándo termina la
+cadena y qué tipo esperamos a la salida. Idealmente, la cadena terminaría cuando
+no queda más entrada.
+
+Apoyándonos en Rust por familiaridad, podemos buscar alguna función que se parezca
+a lo que buscamos.
+
+Y _resulta_ (xd) que tenemos un ["**y luego**"](https://doc.rust-lang.org/std/result/enum.Result.html#method.and_then)
+que se parece bastante a lo que buscamos, entre los métodos de `Result<T, E>`:
+
+```rust
+/// Calls `op` if the result is `Ok`, otherwise returns the `Err` value of `self`.
+///
+/// This function can be used for control flow based on `Result` values.
+pub fn and_then<U, F>(self, op: F) -> Result<U, E>
+where
+    F: FnOnce(T) -> Result<U, E>,
+```
+
+`and_then` recibe como parámetro un valor `Result<T, E>` (ese `self`) y una función
+`FnOnce(T) -> Result<U, E>` (ese `op`), devolviendo el tipo `Result<U, E>`.
+Es decir, **encadena un resultado con éxito** con una **función que devuelve otro
+resultado (con éxito o sin él)**. Si el primer resultado no tuvo éxito,
+devolvemos el error directamente, sin encadenarlo con la función `op`.
+
+Existe un equivalente en Haskell, y el sistema de tipos nos permite expresar esta
+capacidad de encadenamiento de una forma tan abstracta que, usando la terminología
+de orientación a objetos por familiaridad, es el equivalente al método de una
+interfaz. Haskell llama a estas formas de reusar código **clases de tipo** (no
+confundir con las clases en orientación a objetos) o _typeclass_.
+En Rust, el equivalente son los _traits_.
+
+Esta clase de tipo, por fin, es la clase [`Monad`](https://hackage-content.haskell.org/package/base-4.22.0.0/docs/Prelude.html#t:Monad). De ahí lo de _combinadores monádicos_.
+
+Fíjate en el único método (o más bien operador) que debe definir un tipo para
+implementar esta clase `Monad`:
+
+![Definición mínima de la clase Monad](./img/hs_monad_definition.png)
+
+> Compone dos acciones secuencialmente, pasando cualquier valor producido por la
+> primera como argumento para la segunda.
+
+Este `>>=` es un operador que une dos argumentos, un valor `m a` (la primera
+acción) y una función `(a -> m b)` (la segunda, que depende del resultado de la
+primera).
+
+Te ayudo a unir Haskell y Rust usando una suerte de álgebra de tipos.
+
+- `m _` es `Result<_, E>`.
+- `a` es `T`, por tanto `m a` es `Result<T, E>`.
+- `b` es `U`, por tanto `m b` es `Result<U, E>`.
+- Por tanto, `a -> m b` es `FnOnce(T) -> Result<U, E>`
+  - Obviemos _ownership_, semánticas de movimiento de valores, etc, y aceptemos ese `FnOnce` como _función en general_ por ahora.
 
 ```haskell
-variable :: TokenParser (Variable 'Unresolved)
-variable = do
-  void $ satisfy ((VAR ==) . tokenType) "Expect 'var'."
-  (name, l) <- variableName
-  -- Intentamos con inicializador, o si falla, sin él.
-  initExpr <- withInitializer <|> noInitializer 
-  pure $ Variable name initExpr l
+-- Haskell       -- Rust
+(>>=)            -- fn and_then(
+  :: m a         --   self: Result<T, E>,
+  -> (a -> m b)  --   op: FnOnce(T) -> Result<U ,E>
+  -> m b         -- ) -> Result<U, E>
 ```
 
-Este enfoque permite componer parsers pequeños para construir otros más complejos, manteniendo el código extremadamente limpio y cercano a la notación BNF de la gramática.
+**¡Son lo mismo!** La diferencia es que Rust no puede expresar ese `and_then` para
+ciertos grupos de tipos como parte de un _trait_, como también exploramos en mi
+[anterior artículo](./2024-11-13-mapeando-estructuras.md).
 
 ## 5. El Gran Reto: "Resolution Distance" y Árboles que Crecen
 
@@ -334,7 +643,7 @@ Es un pequeño detalle, pero demuestra cómo Haskell te permite modelar el domin
 
 Además de la suite oficial de tests de Lox (que son casos de ejemplo específicos), aproveché el ecosistema de Haskell para añadir **Property-Based Testing** con `QuickCheck`.
 
-En lugar de escribir `assert(scan("((") == [LEFT_PAREN, LEFT_PAREN])`, defino propiedades universales que mi código debe cumplir para *cualquier* cadena de entrada generada aleatoriamente. Por ejemplo, mi escáner debe cumplir siempre que:
+En lugar de escribir `assert(scan("((") == [LEFT_PAREN, LEFT_PAREN])`, defino propiedades universales que mi código debe cumplir para _cualquier_ cadena de entrada generada aleatoriamente. Por ejemplo, mi escáner debe cumplir siempre que:
 
 1. La lista de tokens resultante nunca puede ser más larga que la cadena de entrada (más uno por el EOF).
 2. El escaneo siempre termina en un token `EOF` o en un error de "String no terminado".
@@ -380,14 +689,14 @@ Esto convierte el rendimiento en una propiedad observable del proyecto, tan impo
 
 Implementar Lox en Haskell ha sido un ejercicio de traducción cultural.
 
-* Donde OOP ve **Comportamiento encapsulado con Datos**, FP ve **Datos puros y Funciones transformadoras**.
-* Donde OOP usa **Identidad de Objetos**, FP usa **Tipos Estructurales**.
-* Donde OOP usa **Excepciones y Mutabilidad**, FP usa **Mónadas y Transformadores**.
+- Donde OOP ve **Comportamiento encapsulado con Datos**, FP ve **Datos puros y Funciones transformadoras**.
+- Donde OOP usa **Identidad de Objetos**, FP usa **Tipos Estructurales**.
+- Donde OOP usa **Excepciones y Mutabilidad**, FP usa **Mónadas y Transformadores**.
 
 Arquitecturas como la **Resolución basada en Tipos** me han mostrado un poder de expresividad y seguridad que difícilmente quiero abandonar para volver al mundo de `void foo()`. Haskell es una herramienta inmensamente poderosa que no solo resuelve problemas, sino que afila la mente del programador en el proceso.
 
 El código completo está disponible en el repositorio.
 
-¿El siguiente paso? El libro *Crafting Interpreters* tiene una segunda parte: una máquina virtual de bytecode escrita en C (`clox`). Para cerrar el círculo, planeo implementar esta segunda parte en **Rust**, aplicando (o ignorando deliberadamente) las lecciones funcionales aprendidas aquí en un entorno de sistemas de bajo nivel.
+¿El siguiente paso? El libro _Crafting Interpreters_ tiene una segunda parte: una máquina virtual de bytecode escrita en C (`clox`). Para cerrar el círculo, planeo implementar esta segunda parte en **Rust**, aplicando (o ignorando deliberadamente) las lecciones funcionales aprendidas aquí en un entorno de sistemas de bajo nivel.
 
 ¡Feliz hacking funcional!
