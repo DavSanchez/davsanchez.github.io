@@ -4,7 +4,7 @@
 page:
   siteTitle: David SLT
 
-  siteUrl: blog.tech.davidslt.es
+  # siteUrl: davidslt.es
 
 template:
   theme: blue
