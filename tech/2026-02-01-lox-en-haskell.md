@@ -346,7 +346,7 @@ de que solo los genéricos apropiados puedan servir como parámetros del AST. Un
 algún tipo de _restricción_ sobre `a`... Rust utiliza técnicas como [_traits_ sellados](https://rust-lang.github.io/api-guidelines/future-proofing.html) para lograr esto, pero
 en Haskell, gracias a su completo sistema de tipos, hay otras opciones.
 
-Para expresar esto, utilicé los conceptos de **Data Kinds** y **Type Families**.
+Para expresar esto, utilicé los conceptos de **_Data Kinds_** y **_Type Families_**.
 
 #### ¿Qué es eso de _Kinds_?
 
@@ -412,9 +412,9 @@ información dinámicamente (una variable puede estar definida 2 _scopes_ léxic
 o podría ser una variable global) ¿Cómo la incorporamos al AST si hemos restringido los tipos genéricos
 a este `Kind`?
 
-Aquí intervienen las **Type Families**.
+Aquí intervienen las **_Type Families_**.
 
-#### **Type Families**
+#### **_Type Families_**
 
 Una familia de tipos o _type family_ no es otra cosa que una función de tipo a tipo. Como tal, solo
 existe en tiempo de compilación, pero eso no la hace ni mucho menos inútil.
@@ -486,8 +486,8 @@ Si intento ejecutar un programa sin resolver, ¡el código ni siquiera compila! 
 
 ##### Un breve paso por los GADTs
 
-Otra forma que exploré para codificar esto fueron los **GADTs (Generalized Algebraic Data Types)**, una suerte de
-tipos genéricos cuyo parámetro genérico está determinado por su constructor de datos, pero finalmente la solución
+Otra forma que exploré para codificar esto fueron los **GADTs (Generalized Algebraic Data Types)**,
+tipos genéricos cuyo parámetro concreto está determinado por su constructor de datos, pero finalmente la solución
 con **Data Kinds** y **Type Families** estaba más alineada con lo que quería lograr.
 
 ## Gestionando el Estado: Restricciones por clases y MTL
