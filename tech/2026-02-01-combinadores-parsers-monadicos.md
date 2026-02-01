@@ -25,7 +25,7 @@ tags:
 >
 > Aquí exploro cómo los combinadores permiten construir _parsers_ monádicos complejos componiendo piezas simples, y cómo el concepto de mónada ya aparece en cierta forma en Rust.
 
-Este artículo tiene un poco de miga, pero creo que muestra la verdadera potencia de Haskell y la programación funcional a quienes no la conocen.
+Tiene un poco de miga, pero creo que muestra la verdadera potencia de Haskell y la programación funcional a quienes no la conocen.
 
 La versión de Java del libro **Crafting Interpreters** hace uso del descenso recursivo para implementar el _parser_. Aunque la idea es similar, yo iteré sobre el patrón del escáner y apreté un poco más la tuerca usando unas estructuras bastante potentes, los combinadores de _parsers_ monádicos.
 
