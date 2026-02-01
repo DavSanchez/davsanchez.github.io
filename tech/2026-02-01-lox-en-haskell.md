@@ -6,7 +6,7 @@ page:
   bodyHtml: |
     <snippet var="js.mermaid" />
   description: |
-    O, en resumen, qué tal estuvo implementar un lenguaje de programación con tipado dinámico y orientado a objetos, con clases y herencia, utilizando programación funcional pura y estáticamente tipada.
+    O qué tal estuvo implementar un lenguaje de programación con tipado dinámico y orientado a objetos, con clases y herencia, utilizando programación funcional pura y estáticamente tipada.
 tags:
   - haskell
   - fp
@@ -42,7 +42,7 @@ aplico su filosofía a todos los demás aspectos de mi vida.
 En cualquier caso, desde hace años, Haskell es mi lenguaje para proyectos paralelos
 y mis entornos de desarrollo y despliegue se describen vía Nix.
 
-Estas perspectivas me acompañan hoy día en mi trabajo diario con Rust, mi lenguaje profesional.
+Estas perspectivas me acompañan hoy día en mi trabajo diario con **Rust**, mi lenguaje profesional.
 Creo que soy mejor programador gracias a ellas.
 
 ## Fabricando intérpretes
@@ -111,7 +111,8 @@ Busco Dart en el repositorio de paquetes de Nix, `nixpkgs`, el [más grande y m�
 la revisión de `git` de `nixpkgs` que contenga la versión de Dart que me sirve. Fijo la revisión
 como entrada a mi _flake_... y listo, **Dart 2.19.6** listo para ejecutar en mi terminal. Gracias a
 `direnv`, en el momento en el que salgo del directorio del proyecto el ejecutable de `dart`
-desaparece (o volvería a la 3.9.4 si fuese un programador de Dart con una instalación global).
+desaparece o, si fuese un programador de Dart con una instalación global, volvería a la última a
+fecha de escribir el artículo (3.9.4).
 
 De nuevo, tirando de las funciones de Nix escribo un _script_, también en Haskell, (**_inline!_**)
 que llama a Dart como si fuese un _script_ de Bash, de forma que puedo ejecutar los tests de cada
@@ -702,6 +703,8 @@ En mi caso ensució un poco el código (tuve que mantener expuestas las funcione
 
 Una consecuencia algo negativa de esto es que me hizo no escribir tantos tests unitarios o _property-based testing_ como habría sido ideal. Total, si pasaban los tests oficiales es que iba por buen camino.
 
+No es todo lo exhaustiva que habría deseado, particularmente en un aspecto que comento justo a continuación, pero es más que suficiente.
+
 ### Cosas que no me han gustado
 
 #### Reporte de errores
@@ -713,7 +716,14 @@ Al llegar al capítulo 6 (_Parsing Expressions_) se pasa un poco por encima de l
 
 Esto causó que hubiera pocos capítulos en los que no tuviera que toquetear la gestión de los errores después de hacer algo que no estaba relacionado más allá de especificar el tipo de error en la firma de las funciones. Unos tests dedicados al principio podían haber hecho que me peleara un poco más con ese aspecto en ese momento para luego no volver a tocarlo más.
 
-Fue bastante molesto.
+Cuando terminé la implementación del intérprete y pasé la _suite_ de tests al completo tuve **un único error**. Un único error de mi implementación de los cientos de casos cubiertos a lo largo de todos los capítulos.
+
+¿El comportamiento que rompió el test? Exacto, el maldito error reporting en el _resolver_, que se implementa varios capítulos antes. ¿Relacionado con lo que había implementado por último (herencia)?
+!No! Pero hasta en la última línea de código que escribí, el último _commit_ del último capítulo, ahí estaba el error reporting no comportándose como debía.
+
+Unos tests dedicados a cubrir esto desde el principio, en lugar de pasar superficialmente en cada capítulo, me habrían ahorrado luchas con un componente que debía estar ahí durante el desarrollo real sin molestar demasiado.
+
+Bastante frustrante.
 
 #### Un poco repetitivo
 
@@ -726,10 +736,6 @@ Quizá sea por lo que comentaba al principio de que no me ha enseñado nada tota
 5. Añade gestión de las nuevas variantes del AST en el intérprete.
 
 Ciertamente había algo de desafío cada vez. ¿Cómo se interpreta exactamente `this` o `super`? ¿Cómo se _llaman_ las funciones o métodos? ¿Cómo se crea una instancia de una clase y se saben los métodos que tiene la instancia a su disposición, etc? Pero había toda una ceremonia a repetir con cada nuevo rasgo que añadías al lenguaje que lo volvía algo tedioso.
-
-### Código completo de `hox`
-
-El código completo está disponible en el repositorio de [`hox`](https://github.com/DavSanchez/hox). ¡Echa un vistazo!
 
 ## Siguientes pasos
 
@@ -774,11 +780,8 @@ Esto convierte el rendimiento en una propiedad observable del proyecto, a la esp
 
 ### La _bytecode virtual machine_, en Rust
 
-Como ya mencioné, el libro _Crafting Interpreters_ tiene una segunda parte: una máquina virtual de _bytecode_ escrita en C (`clox`). Esta vez todos los compañeros del club de lectura hemos estado de acuerdo en utilizar **Rust**, pero ya que lo utlizamos diariamente en su forma _segura_, aprovecharemos para seguir los detalles de la implementación en C, sumergirnos de lleno en ámbitos `unsafe` y crear nuestras propias estructuras de datos desde cero (nuestros propios _arrays_ dinámicos en lugar de usar `Vec`, etc). Ya veremos cuando lleguemos a la sección de _garbage collection_... ¡Tiene pinta de que lo vamos a pasar especialmente "bien"!
+Como ya mencioné, el libro _Crafting Interpreters_ tiene una segunda parte: una máquina virtual de _bytecode_ escrita en C (`clox`). Esta vez todos los compañeros del club de lectura hemos estado de acuerdo en utilizar **Rust** pero, ya que lo utlizamos diariamente en su forma _segura_, aprovecharemos para seguir los detalles de la implementación en C y sumergirnos de lleno en ámbitos `unsafe`, creando nuestras propias estructuras de datos desde cero (nuestros propios _arrays_ dinámicos en lugar de usar `Vec`, etc). Ya veremos cuando lleguemos a la sección de _garbage collection_... ¡Tiene pinta de que lo vamos a pasar especialmente "bien"!
 
-Al momento de escribir este artículo apenas estamos empezando, pero puedes seguir el desarrollo de mi implementación (llamada, no muy originalmente, `rox`) [aquí](https://github.com/DavSanchez/rox).
-
-Veamos si el repaso del paradigma funcional puro que seguí en `hox` puede ayudarme en `rox` con _unsafe_ Rust.
-Como mínimo, seguro que sigo dándole la vara a mis compañeros con la programación guiada por tipos.
+Al momento de escribir este artículo apenas estamos empezando, pero puedes seguir el desarrollo de mi implementación de `rox` (otro nombre original) [aquí](https://github.com/DavSanchez/rox).
 
 ¡Hasta otra!
