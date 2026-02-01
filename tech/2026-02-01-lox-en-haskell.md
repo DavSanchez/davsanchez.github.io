@@ -6,7 +6,7 @@ page:
   bodyHtml: |
     <snippet var="js.mermaid" />
   description: |
-    O, en resumen, qué tal estuvo implementar un lenguaje de programación con tipado dinámico y orientado a objetos, con clases y herencia, utilizando **programación funcional pura y estáticamente tipada.
+    O, en resumen, qué tal estuvo implementar un lenguaje de programación con tipado dinámico y orientado a objetos, con clases y herencia, utilizando programación funcional pura y estáticamente tipada.
 tags:
   - haskell
   - fp
