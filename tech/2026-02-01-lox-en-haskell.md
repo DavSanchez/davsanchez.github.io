@@ -1,9 +1,7 @@
 ---
 title: "Implementando Lox en Haskell"
 short-title: "Lox en Haskell"
-date: 2026-01-20
-page:
-  image: blog/img/functor-diagram.png
+date: 2026-02-01
 tags:
   - haskell
   - fp
@@ -184,7 +182,7 @@ naiveScanTokens ::
 > [!note] ¿Naíf?
 > La función se llama `naiveScanTokens` porque inicialmente exploré, aparte de
 > esta versión literalmente escrita caso a caso según leía, otra versión utilizando
-> _combinadores monádicos_ (ya, ya. Sigue leyendo) y la biblioteca
+> _combinadores de parsers monádicos_ (ya, ya. Sigue leyendo) y la biblioteca
 > [`megaparsec`](https://hackage.haskell.org/package/megaparsec).
 >
 > Finalmente descarté esta segunda opción por una cuestión didáctica a varios niveles:
@@ -293,13 +291,11 @@ tiene que fabricar para agilizar el añadido de dichas clases (son 21).
 
 Puedes ver mi tipo de expresión actual en [`Syntax/Expression.hs`](https://github.com/DavSanchez/hox/blob/d318b821e162fcd548841b0f7f5d1a9bfd380169/src/Language/Syntax/Expression.hs).
 
-## Parseando: combinadores monádicos
+## Parseando: combinadores de _parsers_ monádicos
 
 Esta sección creció demasiado, así que he decidido extraerla en su propio artículo para darle la atención que merece.
 
-Si quieres saber cómo funcionan los _parsers_ monádicos, qué tienen que ver con `Result::and_then` en Rust y cómo se combinan para crear estructuras complejas a partir de piezas simples, echa un vistazo a:
-
-👉 **[Combinadores de Parsers Monádicos](./BLOG_DRAFT_PARSERS.md)**
+Si quieres saber cómo funcionan los _parsers_ monádicos, qué tienen que ver con `Result::and_then` en Rust y cómo se combinan para crear estructuras complejas a partir de piezas simples, echa un vistazo a mi **[Introducción a los Combinadores de Parsers Monádicos](./2026-02-01-combinadores-parsers-monadicos.md)**
 
 Allí explico en detalle cómo pasamos de la idea de un escáner manual a una abstracción mucho más potente y reutilizable.
 

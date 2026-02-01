@@ -1,6 +1,6 @@
 ---
-title: "Introducción a los Combinadores Monádicos de Parsers"
-short-title: "Combinadores Monádicos de Parsers"
+title: "Introducción a los Combinadores de Parsers Monádicos"
+short-title: "Combinadores de Parsers Monádicos"
 date: 2026-02-01
 page:
   image: blog/img/monadic-parser-combinator-legos.png
@@ -18,11 +18,11 @@ tags:
 > [!info] Contexto
 > Este artículo nace de una sección que creció demasiado en mi [artículo sobre implementar Lox en Haskell](./BLOG_DRAFT.md).
 >
-> Aquí exploro cómo los combinadores monádicos permiten construir _parsers_ complejos componiendo piezas simples, y cómo el concepto de mónada ya aparece en cierta forma en Rust.
+> Aquí exploro cómo los combinadores permiten construir _parsers_ monádicos complejos componiendo piezas simples, y cómo el concepto de mónada ya aparece en cierta forma en Rust.
 
 Este artículo tiene un poco de miga, pero creo que muestra la verdadera potencia de Haskell y la programación funcional a quienes no la conocen.
 
-La versión de Java del libro **Crafting Interpreters** hace uso del descenso recursivo para implementar el _parser_. Aunque la idea es similar, yo iteré sobre el patrón del escáner y apreté un poco más la tuerca usando unas estructuras bastante potentes, los combinadores monádicos de _parsers_.
+La versión de Java del libro **Crafting Interpreters** hace uso del descenso recursivo para implementar el _parser_. Aunque la idea es similar, yo iteré sobre el patrón del escáner y apreté un poco más la tuerca usando unas estructuras bastante potentes, los combinadores de _parsers_ monádicos.
 
 Veamos de qué van.
 
@@ -87,7 +87,7 @@ parser :: s -> Either e (a, s)
 Ahora la salida del caso de éxito de mi función es una _**tupla**_ que contiene dos tipos, el tipo de salida **y el resto de la entrada que falta por procesar**.
 
 > [!info]
-> En mi implementación [el tipo `Parser` no es exactamente así](https://github.com/DavSanchez/hox/blob/d318b821e162fcd548841b0f7f5d1a9bfd380169/src/Language/Parser.hs#L25-L27) debido a su capacidad de [sincronización y recuperación de errores](https://www.craftinginterpreters.com/parsing-expressions.html#panic-mode-error-recovery), pero no necesitamos cubrir ese aspecto para entender los combinadores monádicos en su forma básica.
+> En mi implementación [el tipo `Parser` no es exactamente así](https://github.com/DavSanchez/hox/blob/d318b821e162fcd548841b0f7f5d1a9bfd380169/src/Language/Parser.hs#L25-L27) debido a su capacidad de [sincronización y recuperación de errores](https://www.craftinginterpreters.com/parsing-expressions.html#panic-mode-error-recovery), pero no necesitamos cubrir ese aspecto para entender la combinación de _parsers_ monádicos en su forma básica.
 
 Aquí está la forma final que tendría un _parser_ totalmente genérico, encapsulado en una estructura que engloba un único tipo de valor (la función de _parsing_ en sí) y un alias para los tipos concretos con los que vamos a trabajar:
 
@@ -135,7 +135,7 @@ where
 
 Existe un equivalente en Haskell, y el sistema de tipos nos permite expresar esta capacidad de encadenamiento de una forma tan abstracta que, usando la terminología de orientación a objetos por familiaridad, es el equivalente al método de una interfaz. Haskell llama a estas formas de reusar código **clases de tipo** (no confundir con las clases en orientación a objetos) o _typeclass_. En Rust, el equivalente son los _traits_.
 
-Esta clase de tipo, por fin, es la clase [`Monad`](https://hackage-content.haskell.org/package/base-4.22.0.0/docs/Prelude.html#t:Monad). De ahí lo de _combinadores monádicos_.
+Esta clase de tipo, por fin, es la clase [`Monad`](https://hackage-content.haskell.org/package/base-4.22.0.0/docs/Prelude.html#t:Monad). De ahí lo de _parsers monádicos_.
 
 Fíjate en el único método (o más bien operador) que debe definir un tipo para implementar esta clase `Monad`:
 
@@ -375,7 +375,7 @@ Comparado con la implementación típica de descenso recursivo imperativo, donde
 
 ## Conclusión
 
-Los combinadores monádicos de _parsers_ son un ejemplo claro de cómo estas abstracciones matemáticas
+Los combinadores de _parsers_ monádicos son un ejemplo claro de cómo estas abstracciones matemáticas
 reducen los problemas a sus elementos primordiales y a cómo se relacionan (componen) entre sí,
 llevan a código más expresivo, fácil de componer desde esas piezas pequeñas a piezas más grandes y
 también, una vez te acostumbras, ¡muy legible a su manera!
