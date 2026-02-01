@@ -2,12 +2,12 @@
 title: "Introducción a los Combinadores de Parsers Monádicos"
 short-title: "Combinadores de Parsers Monádicos"
 date: 2026-02-01
-description: |
-  Este artículo nace de una sección que creció demasiado en mi artículo sobre implementar Lox en Haskell.
-
-  Aquí exploro cómo los combinadores permiten construir _parsers_ monádicos complejos componiendo piezas simples, y cómo el concepto de mónada ya aparece en cierta forma en Rust.
 page:
   image: blog/img/monadic-parser-combinator-legos.png
+  description: |
+    Este artículo nace de una sección que creció demasiado en mi artículo sobre implementar Lox en Haskell.
+
+    Aquí exploro cómo los combinadores permiten construir _parsers_ monádicos complejos componiendo piezas simples, y cómo el concepto de mónada ya aparece en cierta forma en Rust.
 tags:
   - haskell
   - fp

@@ -2,12 +2,12 @@
 title: "Implementando Lox en Haskell"
 short-title: "Lox en Haskell"
 date: 2026-02-01
-description: |
-  O, en resumen, qué tal estuvo implementar un lenguaje de programación orientado a objetos basado en clases
-  usando **programación funcional pura y estáticamente tipada.
 page:
   bodyHtml: |
     <snippet var="js.mermaid" />
+  description: |
+    O, en resumen, qué tal estuvo implementar un lenguaje de programación orientado a objetos basado en clases
+    usando **programación funcional pura y estáticamente tipada.
 tags:
   - haskell
   - fp
