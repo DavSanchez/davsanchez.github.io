@@ -2,10 +2,14 @@
 title: "Implementando Lox en Haskell"
 short-title: "Lox en Haskell"
 date: 2026-02-01
+page:
+  bodyHtml: |
+    <snippet var="js.mermaid" />
 tags:
   - haskell
   - fp
   - tech
+  - type-driven development
   - 🇪🇸
 ---
 <!-- LTeX: language=es -->
@@ -16,7 +20,7 @@ tags:
 >
 > ![Jean-Baptiste Emmanuel Zorg diciendo "mi favorito".](https://camo.githubusercontent.com/c553f4c74ab9dba08d78c9511cfd7a4fd19dd4047ac86e608ea581d3526778be/68747470733a2f2f6d656469612e74656e6f722e636f6d2f584a77773370595a59394d41414141432f7a6f72672d6d792d6661766f75726974652e676966)
 >
-> Transparencia referencial, inmutabilidad, evaluación perezosa, programación por tipos, mónadas,
+> Transparencia referencial, inmutabilidad, evaluación perezosa, programación guiada por tipos, mónadas,
 > cálculo lambda y otros amigos.
 
 Siempre me atrajo la programación funcional propuesta por **Haskell**.
@@ -31,7 +35,7 @@ Como también me pasa con **Nix**, toda aquella pieza de tecnología con estos p
 tras curvas de aprendizaje popularmente elevadas—, que prometa a cambio una mejor perspectiva sobre
 la programación o alguno de sus aspectos tangenciales suele ganar mi interés.
 
-Quizá solamente es porque juego al Bloodborne y
+Quizá solamente es porque juego al **Bloodborne** y
 aplico su filosofía a todos los demás aspectos de mi vida.
 En cualquier caso, desde hace años, Haskell es mi lenguaje para proyectos paralelos
 y mis entornos de desarrollo y despliegue se describen vía Nix.
@@ -295,47 +299,168 @@ Puedes ver mi tipo de expresión actual en [`Syntax/Expression.hs`](https://gith
 
 Esta sección creció demasiado, así que he decidido extraerla en su propio artículo para darle la atención que merece.
 
-Si quieres saber cómo funcionan los _parsers_ monádicos, qué tienen que ver con `Result::and_then` en Rust y cómo se combinan para crear estructuras complejas a partir de piezas simples, echa un vistazo a mi **[Introducción a los Combinadores de Parsers Monádicos](./2026-02-01-combinadores-parsers-monadicos.md)**
+Si quieres saber cómo funcionan los _parsers_ monádicos, qué tienen que ver con `Result::and_then` en Rust y cómo se combinan para crear estructuras complejas a partir de piezas simples, echa un vistazo a mi **[Introducción a los Combinadores de _Parsers_ Monádicos](./2026-02-01-combinadores-parsers-monadicos.md)**
 
-Allí explico en detalle cómo pasamos de la idea de un escáner manual a una abstracción mucho más potente y reutilizable.
+Allí explico en detalle cómo pasamos de la idea de un escáner manual a una abstracción mucho más potente, declarativa y reutilizable.
 
 ## Codificando la distancia de resolución de variables en el AST
 
-Uno de los desafíos más interesantes fue el capítulo de **Resolución de Variables**. En Lox, para manejar cierres (closures) correctamente, necesitamos saber a cuántos "saltos" (scopes) de distancia está definida una variable.
+Uno de los desafíos más interesantes fue el capítulo de **Resolución de Variables**. En Lox, para manejar cierres (_closures_) correctamente, necesitamos saber a cuántos "saltos" (_scopes_ léxicos) de distancia está definida una variable.
 
 ### La solución Java: Side-Tables
 
-En Java, el Resolver recorre el árbol y guarda esta información en un `Map<Expr, Integer>` separado. El AST no cambia. Esto funciona en Java porque cada objeto `Expr` tiene identidad (dirección de memoria) y puede usarse como clave en un mapa.
+En Java, el _Resolver_ recorre el árbol y guarda esta información en un `Map<Expr, Integer>` separado. El AST no cambia. Esto funciona en Java porque cada objeto `Expr` tiene identidad (dirección de memoria) y puede usarse como clave en un mapa.
 
 ### El problema en Haskell
 
-En Haskell, los valores son inmutables y estructurales. `Variable "a"` es idéntico a otro `Variable "a"`. No tienen "identidad" por defecto. Para usar un `Map`, necesitaría adjuntar IDs únicos a cada nodo o usar trucos inseguros.
+En Haskell, los valores son inmutables y estructurales. `Variable "a"` es idéntico a otro `Variable "a"`. No tienen "identidad" por defecto. Para usar un `Map`, necesitaría adjuntar IDs únicos a cada nodo de forma incremental, lo que no escalaría demasiado, o usar trucos inseguros como salir a `IO` para obtener uno aleatorio.
 
-### La solución Haskell: Tipos Dependientes de la Fase
+### Type-Driven Development
 
-En lugar de una tabla lateral, decidí que la información de resolución debía vivir **dentro** del propio AST. Pero el Parser no conoce esa información todavía. ¿Cómo definimos un tipo que a veces tiene resolución y a veces no?
+En lugar de una tabla lateral, decidí que la información de resolución debía vivir **dentro** del propio AST. Pero el `Parser` no conoce esa información en el momento en que emite nuestro AST. ¿Cómo definimos un AST que a veces tiene resolución y a veces no de forma segura?
 
-Usé una técnica inspirada en el paper ["Trees That Grow"](https://www.microsoft.com/en-us/research/publication/trees-that-grow/), utilizando **Data Kinds** y **Type Families**:
+Con esto de "segura" me refiero a que quiero validar estáticamente que mi AST está en el estado correcto en cada
+etapa de su procesamiento. Es decir, mi _parser_ debe ser una función de tipo (obviando posibilidad de errores y otras cosas cubiertas con anterioridad):
 
 ```haskell
--- Definimos las fases del compilador
+parser :: [Token] -> UnresolvedAST
+```
+
+Y que, del mismo modo, la etapa de resolución sea llevada a cabo por una función `resolver` de tipo:
+
+```haskell
+resolver :: UnresolvedAST -> ResolvedAST
+```
+
+De forma que al intérprete real del programa solo pueda pasársele el tipo `ResolvedAST`:
+
+```haskell
+interpret :: ResolvedAST -> Either RuntimeError ()
+```
+
+Esto es la seguridad de tipos o _type safety_, ninguna función debe poder recibir un valor de un tipo que
+no le corresponde. Nada de pasarle ASTs ya "resueltos" al `resolver`, o ASTs sin resolver al `interpret`.
+
+Esto se podría lograr parametrizando el tipo de AST con un genérico, pero entonces tendríamos que preocuparnos
+de que solo los genéricos apropiados puedan servir como parámetros del AST. Un simple `AST a` no vale, necesito
+algún tipo de _restricción_ sobre `a`... Rust utiliza técnicas como [_traits_ sellados](https://rust-lang.github.io/api-guidelines/future-proofing.html) para lograr esto, pero
+en Haskell, gracias a su completo sistema de tipos, hay otras opciones.
+
+Para expresar esto, utilicé los conceptos de **Data Kinds** y **Type Families**.
+
+#### ¿Qué es eso de _Kinds_?
+
+He pasado de forma extremadamente superficial en [otro de mis artículos](./2024-11-13-mapeando-estructuras.md), pero aquí ahondo un poco más.
+
+Puedes definir un tipo como **el conjunto de valores contenidos en ese tipo**:
+
+- `Bool` es un tipo que contiene a los valores `True` y `False`.
+- `Int` es un tipo que contiene a los valores enteros (..., `-2`, `-1`, `0`, `1`, `2`, etc).
+
+Se puede decir que los valores (_terms_) pertenecen al _universo_ de sus tipos. `False` pertenece al
+universo de `Bool`, `-1` al universo de `Int`, etc.
+
+Los tipos, a su vez, tienen su propia clasificación, subiendo un nivel de abstracción, llamada `Kind`.
+En función de cómo de genéricos son, los tipos están englobados en sus propios _universos_ o `Kind`s.
+
+- `Type` es el _universo_ (`Kind`) de los tipos básicos.
+  - `Bool` e `Int` son tipos dentro de este _universo_.
+  - `Maybe Int` o `Either String ()` también pertenecen a este _universo_.
+- `Type -> Type` es el _universo_ de los tipos que tienen un parámetro genérico desconocido.
+  - `Maybe` (¡pero no `Maybe Int`!) pertenece a este _universo_.
+  - `Either String` (¡pero no `Either String ()`!) también pertenece a este _universo_.
+- `Type -> Type -> Type` es el _universo_ de los tipos que tienen dos parámetros genéricos desconocidos.
+  - `Either` (sin especificar ninguno de sus parámetros) pertenece a este _universo_.
+
+Hay otros universos, y pueden combinarse de varias formas.
+
+Sabemos que en Haskell puedes crear tus propios tipos. ¿Podríamos crear nuestros propios `Kind`s?
+Si creo mi propio `Kind`, ¿Qué tipos viven dentro de él? ¿Qué valores tienen esos tipos?
+
+Eso es permitido por lo que se conoce como **Data Kinds**. Cada vez que definimos un tipo, Haskell crea un `Kind` con el mismo nombre, y los constructores de valor del tipo original son como tipos, aunque no se pueden construir valores de estos.
+
+```haskell
+data MyBool   -- This is a type
+  = MyTrue    -- This is a value constructor
+  | MyFalse   -- This is another value constructor
+
+{-
+-- behind the scenes, it's like Haskell created the following:
+kind MyBool    -- This is a Kind
+  = MyTrue    -- This is a type!
+  | MyFalse   -- This is a type!
+-}
+```
+
+Pero si no puedo construir valores de estos extraños tipos promocionados a partir de un tipo convencional,
+¿para qué sirven? Una respuesta fácil es **etiquetar otros tipos**, de forma que obtengo la restricción
+que buscaba para el parámetro genérico de mi tipo AST.
+
+```haskell
+-- Definimos las fases de resolución del AST
 data Phase = Unresolved | Resolved
 
+-- Haskell crea la `Kind` llamada `Phase` entre bambalinas.
+
+-- El AST usa esta `Kind` como parámetro, `p` solo puede ser `Unresolved` o `Resolved`!
+data Expression (p :: Phase)
+  = ...
+```
+
+Aún nos queda un detalle. Si este `Kind` no puede generar valores, y mi resolución necesita esta
+información dinámicamente (una variable puede estar definida 2 _scopes_ léxicos por encima, o 3,
+o podría ser una variable global) ¿Cómo la incorporamos al AST si hemos restringido los tipos genéricos
+a este `Kind`?
+
+Aquí intervienen las **Type Families**.
+
+#### **Type Families**
+
+Una familia de tipos o _type family_ no es otra cosa que una función de tipo a tipo. Como tal, solo
+existe en tiempo de compilación, pero eso no la hace ni mucho menos inútil.
+
+Siendo que nuestro AST está parametrizado por un `Kind` que tiene tipos pero no puede tener valores
+en tiempo de ejecución, la _type family_ puede relacionar los tipos de este `Kind` con tipos que sí
+puedan tener valores.
+
+Siguiendo con nuestro ejemplo:
+
+```haskell
+-- Definimos las fases de resolución del AST
+data Phase = Unresolved | Resolved
+
+-- Un tipo sin valores posibles, "zero-sized"
+data NotResolved
+
+-- Un tipo con valores que representa una resolución concreta, global o local
+data Resolution
+  = Global -- Variable global
+  | Local Int -- Variable local a X (Int) scopes de distancia
+
+-- Haskell crea la `Kind` llamada `Phase` entre bambalinas.
+-- También crearía `Kind`s para `NotResolved` y `Resolution`, pero no nos interesan.
+
 -- Una familia de tipos que cambia según la fase
+-- Funciones que reciben un tipo (de `Kind Phase`) y devuelven otro tipo (de `Kind Type`),
+-- en este caso, los tipos definidos anteriormente
 type family ResolutionInfo (p :: Phase) :: Type where
-  ResolutionInfo 'Unresolved = NotResolved  -- Un tipo vacío
-  ResolutionInfo 'Resolved = Resolution     -- La distancia calculada (Global | Local Int)
+  ResolutionInfo 'Unresolved = NotResolved 
+  ResolutionInfo 'Resolved = Resolution
 
 -- El AST usa esta familia de tipos
 data Expression (p :: Phase)
   = VariableExpr
       Int                -- Línea
       String             -- Nombre
-      (ResolutionInfo p) -- ¡Cambia según la fase!
+      (ResolutionInfo p) -- La type family es aplicada a `p`
   -- ...
 ```
 
-Esto es **Type-Driven Development** puro.
+La _type family_ es una función, en tiempo de compilación relaciona el `Kind` `Phase` con un tipo
+concreto, de esta forma el tipo genérico `p` de nuestro AST no puede ser cualquier cosa, solo lo que
+nosotros definamos, ¡y en tiempo de compilación!
+
+¡Esto es **Type-Driven Development**!
 
 1. El `Parser` produce un `Program 'Unresolved`.
 2. El `Resolver` toma un `Program 'Unresolved` y devuelve un `Program 'Resolved`.
@@ -351,30 +476,38 @@ programInterpreter prog = do
     else throwError (Resolve errors)
 ```
 
-Si intento ejecutar un programa sin resolver, ¡el código ni siquiera compila! Es una garantía de seguridad que Java no puede ofrecer tan fácilmente.
+>[!note]
+> Fíjate en que las firmas de tipo mencionan los tipos del `Kind` `Phase` como `'Unresolved` y
+> `'Resolved` respectivamente, con un apóstrofe delante. Esto es para desambiguar con los constructores
+> de valores del tipo convencional `Phase`, que sigue pudiendo definir valores en tiempo de ejecución
+> aunque no se use para ello.
 
-## 6. Arqueología de Tipos: El Paso por GADTs
+Si intento ejecutar un programa sin resolver, ¡el código ni siquiera compila! Es una garantía de seguridad que otros lenguajes, ni siquiera Rust, pueden ofrecer tan fácilmente.
 
-En las primeras etapas de este proyecto, experimenté con **GADTs (Generalized Algebraic Data Types)** para representar el AST. La idea era ambiciosa: codificar en el sistema de tipos que ciertas operaciones solo eran válidas en fases específicas. Por ejemplo, que el constructor `Variable` solo pudiera contener una `Resolution` si el tipo de la expresión era `Resolved`.
+##### Un breve paso por los GADTs
 
-```haskell
-data Expression p where
-  VariableExpr :: String -> Resolution -> Expression 'Resolved
-  -- ...
-```
+Otra forma que exploré para codificar esto fueron los **GADTs (Generalized Algebraic Data Types)**, una suerte de
+tipos genéricos cuyo parámetro genérico está determinado por su constructor de datos, pero finalmente la solución
+con **Data Kinds** y **Type Families** estaba más alineada con lo que quería lograr.
 
-Sin embargo, pronto me topé con la rigidez de este enfoque para un AST tan grande. Aunque extremadamente seguro, los GADTs pueden complicar tareas como el derivado automático de instancias (`Show`, `Eq`) y requieren un "ceremonial" de tipos que a veces oscurece la lógica del compilador.
+## Gestionando el Estado: Restricciones por clases y MTL
 
-Finalmente, pivoté hacia el patrón **"Trees That Grow"** (usando `DataKinds` y `TypeFamilies`) que mencioné antes. Es una solución más "haskelliana" para este problema específico: permite extender el AST con metadatos según la fase sin perder la ergonomía de los ADTs tradicionales.
-
-## 7. Gestionando el Estado: Capacidades y MTL
-
-En Java, el intérprete es una clase con campos mutables (`environment`). En Haskell, la mutabilidad y los efectos deben ser explícitos. Mi implementación utiliza la librería [**MTL (Monad Transformer Library)**](https://hackage.haskell.org/package/mtl) para construir una "cebolla" de efectos:
+En Java, el intérprete es una clase con campos mutables (`environment`). En Haskell, la mutabilidad y los efectos deben ser explícitos. Mi implementación utiliza la librería [**MTL (Monad Transformer Library)**](https://hackage.haskell.org/package/mtl) para construir una pila de efectos cuyo requerimiento es que cumplan la interfaz mónada:
 
 ```haskell
 newtype InterpreterT m a = Interpreter
   { runInterpreterT :: StateT (ProgramState Value) (ExceptT InterpreterError m) a
   }
+  deriving newtype
+    ( Functor,
+      Applicative,
+      Monad,
+      MonadState (ProgramState Value),
+      MonadError InterpreterError,
+      MonadIO
+    )
+
+type Interpreter = InterpreterT IO -- concrete implementation
 ```
 
 Visualmente, la pila de efectos se ve así:
@@ -387,15 +520,25 @@ graph BT
     InterpreterT["InterpreterT (Newtype Wrapper)"] -->|envuelve| StateT
 ```
 
-Lo interesante aquí no es solo la pila de mónadas, sino cómo se utiliza. Siguiendo las mejores prácticas, la mayoría de las funciones del intérprete no conocen esta pila concreta. En su lugar, utilizan **restricciones de clases de tipos** (capabilities):
+La capacidad de Haskell de generar las implementaciones de `Functor`, `Applicative`, `Monad` y
+las clases de transformadores (`MonadState`, `MonadError`, `MonadIO`) automáticamente, como se ve en ese `deriving newtype ...` hace muy sencillo trabajar con ellas.
+
+Lo interesante aquí no es solo la pila de mónadas ni que las implementaciones se generen automáticamente, sino cómo se utilizan. La mayoría de las funciones del intérprete no conocen el tipo concreto sobre el que operan. En su lugar, utilizan **restricciones de clases de tipos** (_typeclass constraints_):
 
 ```haskell
-evaluateExpr :: (MonadState (ProgramState Value) m, MonadError InterpreterError m) => Expression 'Resolved -> m Value
+evaluateExpr :: (
+  MonadState (ProgramState Value) m,
+  MonadError InterpreterError m
+  ) => Expression 'Resolved -> m Value
 ```
 
-Esta firma dice: "esta función funciona en cualquier mónada `m` que tenga un estado de tipo `ProgramState` y pueda lanzar errores de tipo `InterpreterError`". Esto desacopla la lógica de la implementación concreta, facilitando los tests y permitiendo reutilizar funciones en diferentes contextos (como el Resolver, que comparte algunas de estas capacidades pero no todas).
+Esta firma dice: "esta función funciona en cualquier mónada `m` que tenga un estado de tipo `ProgramState` y pueda lanzar errores de tipo `InterpreterError`". Esto desacopla la lógica de la implementación concreta (mi tipo `Interpreter`), facilitando los tests y permitiendo reutilizar funciones en diferentes contextos (como el `Resolver`, que comparte algunas de estas capacidades pero no todas, teniendo una estructura en cierto modo similar al `Interpreter`).
 
-Un detalle elegante es cómo se manejan los scopes. En Java se usa `try-finally` para asegurar que, al salir de un bloque, el entorno anterior se restaura. En Haskell, uso `catchError` junto con las primitivas de estado:
+No es más que inyección de dependencias para efectos en Haskell, donde _efecto_ es algo tan general
+como "puede fallar con este tipo de error", "gestiona estados de este tipo", etc.
+
+Un detalle elegante es cómo se manejan los _scopes_. En Java podríamos usar `try-catch-finally` para asegurar que, al salir de un bloque, el entorno anterior se restaura. En Haskell, uso `catchError` (una función que es
+proporcionada por la clase `MonadError`, nada que ver con excepciones) junto con las primitivas de estado:
 
 ```haskell
 executeBlock decls = do
@@ -406,52 +549,71 @@ executeBlock decls = do
   pure r
 ```
 
-## 8. Errores como Valores
+Haskell también tiene excepciones, pero trato de no utilizarlas en favor de tratar lo más posible a
+los **errores como valores**.
 
-Una de las diferencias filosóficas más grandes es el manejo de errores. En lugar de que el flujo de control salte mágicamente (Exceptions), los errores son valores (`Left InterpreterError`) que se propagan.
+## Errores como Valores
 
-Aunque `ExceptT` hace que parezca imperativo (puedes hacer short-circuiting), te obliga a ser consciente de en qué partes del código pueden fallar las cosas. No hay "Unchecked Exceptions" aquí.
+Una de las diferencias filosóficas más grandes de mi implementación respecto a la del libro es el manejo de errores. En lugar de que el flujo de control salte mágicamente (con las exceptiones), los errores son valores (`Left InterpreterError`) que se propagan.
 
-## 9. Azúcar Sintáctico: Pattern Synonyms
+Aunque `ExceptT` o la implementación monádica de `Either b` hacen que parezca imperativo trabajar con errores (puedes hacer _short-circuiting_), su estatus de tipos de pleno derecho te obliga a ser consciente de en qué partes del código pueden fallar las cosas y con qué valores pueden fallar. ¡La firma de tipos lo indica!
 
-En mi implementación del flujo de control (bucles, retornos de función), me encontré con un patrón común. Necesitaba un tipo que representara "seguir ejecutando" o "detenerse y devolver un valor".
+Da una tranquilidad enorme saber que, en general, mirar una firma de tipos ya te dice si una función puede fallar o no. Esto se extiende a saber si una función es **pura** o interactúa de alguna forma con el _mundo exterior_ (cuando `IO _` aparece en el valor de retorno).
 
-Podría haber usado `Either b c`, pero quería algo más descriptivo. Definí `ControlFlow`:
+## Azúcar Sintáctico: Pattern Synonyms
+
+En mi implementación del flujo de control y particularmente en los retornos de función (esos `return true;`), de nuevo queriendo distanciarme del uso de excepciones para expresarlas, como hace la implementación de Java (😭💀) me encontré con un patrón común. Necesitaba un tipo que representara "seguir ejecutando" o "detenerse y devolver un valor".
+
+Podría haber usado `Either b c`, pero quería algo más descriptivo, y estando familiarizado con [el tipo `ControlFlow` de Rust](https://doc.rust-lang.org/stable/std/ops/enum.ControlFlow.html) decidí crear mi propia versión, sin que fuera nada del otro mundo:
 
 ```haskell
 data ControlFlow b c
   = Break b     -- Detener el flujo con un valor (ej. return)
-  | Continue c  -- Seguir ejecutando
+  | Continue c  -- Seguir ejecutando (también con un valor, ¿quién sabe?)
 ```
 
-Sin embargo, leer `Break` cuando estamos implementando una sentencia `return` es cognitivamente disonante. Aquí es donde los **Pattern Synonyms** de Haskell brillan. Me permiten crear un "constructor virtual" que aliasa a uno existente:
+Sin embargo, leer `Break` cuando estamos implementando una sentencia `return` me producía un poco de disonancia cognitiva, así que eché mano de otra de las herramientas de tipado de Haskell, los **Pattern Synonyms**. Me permiten crear un "constructor virtual" que hace de alias de uno existente:
 
 ```haskell
 {-# LANGUAGE PatternSynonyms #-}
 
+{-# COMPLETE Return, Continue #-}
+data ControlFlow b c
+  = Break b
+  | Continue c
+  deriving stock (Show, Eq)
+
+-- | Pattern synonym for 'Break' to represent a return value in control flow.
 pattern Return :: b -> ControlFlow b c
 pattern Return x = Break x
 ```
 
-Ahora, mi código del intérprete puede usar `Return` como si fuera un constructor real, haciendo que la intención sea cristalina:
+Añadiendo un pragma `COMPLETE` para que el chequeo de patrones del compilador considere que cubrir `Continue` y `Return` sea exhaustivo sobre todas las variantes del tipo `ControlFlow`, mi código del intérprete puede usar `Return` como si fuera un constructor real, haciendo que la intención sea muy clara:
 
 ```haskell
+runFunctionBody ::
+  ( MonadState (ProgramState Value) m,
+    MonadError InterpreterError m,
+    MonadIO m -- functions can print to screen, check the time, etc
+  ) =>
+  [Declaration 'Resolved] -> m Value
+runFunctionBody [] = pure VNil
 runFunctionBody (d : ds) =
   interpretDeclF d >>= \case
-    Return v -> pure v        -- ¡Se lee como inglés!
+    Return v -> pure v -- yeah Return as Break!
     Continue () -> runFunctionBody ds
 ```
 
-Es un pequeño detalle, pero demuestra cómo Haskell te permite modelar el dominio de tu problema no solo en los tipos, sino también en la sintaxis misma. ¿Es sobre-ingeniería para un intérprete de juguete? Quizás. Pero parte de la diversión de usar un lenguaje expresivo es ver hasta dónde puedes doblarlo para que se ajuste a tus conceptos mentales, y no al revés.
+Es un pequeño detalle, pero demuestra cómo Haskell te permite modelar el dominio de tu problema no solo en los tipos, sino también en la sintaxis misma. ¿Es sobre-ingeniería para este intérprete? Totalmente. Pero parte de la diversión de usar un lenguaje así de expresivo en el tipado (y en general) es ver hasta dónde puedes llegar con él.
 
-## 10. Propiedades, no solo Tests
+## Testeo de propiedades
 
-Además de la suite oficial de tests de Lox (que son casos de ejemplo específicos), aproveché el ecosistema de Haskell para añadir **Property-Based Testing** con `QuickCheck`.
+Además de la _suite_ oficial de tests de Lox, que son casos de ejemplo específicos que analizan la salida de tu programa, lo que no te permite saber _dónde_ tienes el _bug_, aproveché el ecosistema de Haskell para añadir **_Property-Based Testing_** con [`QuickCheck`](https://hackage.haskell.org/package/QuickCheck), una utilidad de test muy conocida, que utilizé desde el _framework_ [`tasty`](https://hackage.haskell.org/package/tasty).
 
-En lugar de escribir `assert(scan("((") == [LEFT_PAREN, LEFT_PAREN])`, defino propiedades universales que mi código debe cumplir para _cualquier_ cadena de entrada generada aleatoriamente. Por ejemplo, mi escáner debe cumplir siempre que:
+En lugar de escribir `assert(scan("((") == [LEFT_PAREN, LEFT_PAREN])`, defino propiedades universales que mi código debe cumplir para _cualquier_ entrada generada aleatoriamente. Por ejemplo, mi escáner debe cumplir siempre que:
 
-1. La lista de tokens resultante nunca puede ser más larga que la cadena de entrada (más uno por el EOF).
-2. El escaneo siempre termina en un token `EOF` o en un error de "String no terminado".
+1. La lista de _tokens_ resultante nunca puede ser más larga que la cadena de entrada (más uno por el EOF).
+2. El escaneo siempre termina en un _token_ `EOF` o en un error de "String no terminado".
 
 ```haskell
 -- test/Scanner/Props.hs
@@ -463,34 +625,9 @@ scannerProperties =
     ]
 ```
 
-Es una forma de testear que encuentra casos borde (como cadenas vacías, o llenas de caracteres nulos) que a un humano difícilmente se le ocurrirían escribir manualmente.
+Es una forma limitada de _fuzz testing_ que comprueba una propiedad en tus funciones generando muchos parámetros aleatorios, pasándolos a tu función repetidas veces y, por medio de técnicas de _shrinking_, mostrándote el mínimo ejemplo donde tus invariantes no se cumplen si lo hay. Es ideal para encontrar esos _casos esquineros_ (como cadenas vacías, o llenas de caracteres nulos) que a veces se nos pasa cubrir con tests unitarios convencionales.
 
-## 11. Midiendo el Rendimiento: Benchmarks en CI
-
-No se puede mejorar lo que no se mide. Para asegurarme de que mis refactorizaciones "idiomáticas" no destrozaran el rendimiento del intérprete, integré una suite de **benchmarks** utilizando `tasty-bench`.
-
-Elegí `tasty-bench` sobre el clásico `criterion` por su ligereza y su integración natural con el resto de mi infraestructura de tests. El benchmark canónico para intérpretes es la función de Fibonacci recursiva, que estresa la resolución de variables, las llamadas a función y las operaciones aritméticas básicas.
-
-```haskell
--- bench/Main.hs
-main :: IO ()
-main = defaultMain
-  [ bgroup "Interpreter"
-      [ bench "fib(20)" $ whnfIO $ runInterpreter $ buildTreeWalkInterpreter $ Right $ tokens 20
-      , bench "fib(25)" $ whnfIO $ runInterpreter $ buildTreeWalkInterpreter $ Right $ tokens 25
-      ]
-  ]
-```
-
-Pero ejecutar benchmarks en mi máquina no es suficiente. Quería visualizar la tendencia histórica. Para ello, configuré un workflow de **GitHub Actions** que:
-
-1. Ejecuta los benchmarks en Linux (x64 y ARM) y macOS.
-2. Convierte los resultados a JSON usando un pequeño script de Python.
-3. Utiliza la acción `benchmark-action/github-action-benchmark` para generar gráficas de evolución y alertar si un commit introduce una regresión de rendimiento superior al 150%.
-
-Esto convierte el rendimiento en una propiedad observable del proyecto, tan importante como la corrección del código.
-
-## Conclusión
+## Conclusiones
 
 Implementar Lox en Haskell ha sido un ejercicio de traducción cultural.
 
@@ -502,6 +639,54 @@ Arquitecturas como la **Resolución basada en Tipos** me han mostrado un poder d
 
 El código completo está disponible en el repositorio.
 
-¿El siguiente paso? El libro _Crafting Interpreters_ tiene una segunda parte: una máquina virtual de bytecode escrita en C (`clox`). Para cerrar el círculo, planeo implementar esta segunda parte en **Rust**, aplicando (o ignorando deliberadamente) las lecciones funcionales aprendidas aquí en un entorno de sistemas de bajo nivel.
+## Siguientes pasos
 
-¡Feliz hacking funcional!
+### Rendimiento
+
+Mi implementación es una traducción en algunos casos equivalente a la de Java que iba siguiendo, en otros casos necesitada de enfoques alternativos.
+
+Cuando la sección del _tree-walk interpreter_ daba paso a la sección de la _bytecode virtual machine_ el autor de Crafting Interpreters propone ver cuánto tarda en nuestra implementación la clásica implementación mala del cálculo de sumas de números de Fibonacci:
+
+```lox
+fun fib(n) {
+  if (n < 2) return n;
+  return fib(n - 1) + fib(n - 2); 
+}
+
+var before = clock();
+print fib(40);
+var after = clock();
+print after - before;
+```
+
+¡Huelga decir que el rendimiento de mi implementación deja bastante que desear!
+
+La elección de determinadas estructuras de datos, por ejemplo las listas enlazadas tan ubicuas en
+Haskell, o la evaluación perezosa por defecto pueden hacer difícil analizar tus cuellos de botella
+con claridad, así que una de las próximas áreas de trabajo es mejorar en este aspecto.
+
+#### _Benchmarks_ en CI
+
+No se puede mejorar lo que no se mide. Para asegurarme de que mis cambios futuros realmente mejoren el
+rendimiento del intérprete, o al menos no lo empeoren, integré una suite de **benchmarks** utilizando `tasty-bench`.
+
+Elegí `tasty-bench` sobre el clásico `criterion` por su integración natural con el resto de mi infraestructura de tests, que ya estaba basada en el ecosistema de `tasty`. Utilicé como _benchmark_ inicial para intérpretes es la función de Fibonacci de antes, que estresa la resolución de variables, las llamadas a función y las operaciones aritméticas básicas.
+
+Pero ejecutar benchmarks en mi máquina no es suficiente. Quería visualizar la tendencia histórica. Para ello, escribí un _workflow_ de **GitHub Actions** que:
+
+1. Ejecuta los benchmarks en Linux (x64 y ARM) y macOS.
+2. Convierte los resultados a JSON usando un pequeño script de Python.
+3. Utiliza la acción `benchmark-action/github-action-benchmark` para generar gráficas de evolución y notificarme si un _commit_ introduce una regresión de rendimiento superior al 150%.
+
+Esto convierte el rendimiento en una propiedad observable del proyecto, a la espera de que haga algo por mejorarla.
+
+### La _bytecode virtual machine_, en Rust
+
+Como ya mencioné, el libro _Crafting Interpreters_ tiene una segunda parte: una máquina virtual de _bytecode_ escrita en C (`clox`). Esta vez todos los compañeros del club de lectura hemos estado de acuerdo en utilizar **Rust**, pero ya que lo utlizamos diariamente en su forma _segura_, aprovecharemos para seguir los detalles de la implementación en C, sumergirnos de lleno en ámbitos `unsafe` y crear nuestras propias estructuras de datos desde cero (nuestros propios _arrays_ dinámicos en lugar de usar `Vec`, etc). Ya veremos cuando lleguemos a la sección de _garbage collection_... ¡Tiene pinta de que lo vamos a pasar especialmente "bien"!
+
+Al momento de escribir este artículo apenas estamos empezando, pero puedes seguir el desarrollo de mi implementación (llamada, no muy originalmente, `rox`) [aquí](https://github.com/DavSanchez/rox).
+
+Veamos si el repaso del paradigma funcional puro que seguí en `hox` puede ayudarme en `rox` con _unsafe_ Rust.
+Como mínimo, seguro que sigo dándole la vara a mis compañeros con la programación guiada por tipos.
+
+¡Hasta otra!
