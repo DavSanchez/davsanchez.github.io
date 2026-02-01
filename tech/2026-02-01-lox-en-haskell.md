@@ -737,7 +737,7 @@ El código completo está disponible en el repositorio de [`hox`](https://github
 
 Mi implementación es una traducción en algunos casos equivalente a la de Java que iba siguiendo, en otros casos necesitada de enfoques alternativos.
 
-Cuando la sección del _tree-walk interpreter_ daba paso a la sección de la _bytecode virtual machine_ el autor de Crafting Interpreters propone ver cuánto tarda en nuestra implementación la clásica implementación mala del cálculo de sumas de números de Fibonacci:
+Cuando la sección del _tree-walk interpreter_ da paso a la sección de la _bytecode virtual machine_, el autor de Crafting Interpreters propone ver cuánto tarda nuestra implementación de Lox en evaluar un programa con la típica implementación básica del cálculo de sumas de números de Fibonacci:
 
 ```lox
 fun fib(n) {
@@ -754,7 +754,7 @@ print after - before;
 ¡Huelga decir que el rendimiento de mi implementación deja bastante que desear!
 
 La elección de determinadas estructuras de datos, por ejemplo las listas enlazadas tan ubicuas en
-Haskell, o la evaluación perezosa por defecto pueden hacer difícil analizar tus cuellos de botella
+Haskell, la inmutabilidad o la evaluación perezosa por defecto pueden hacer difícil analizar tus cuellos de botella
 con claridad, así que una de las próximas áreas de trabajo es mejorar en este aspecto.
 
 #### _Benchmarks_ en CI
