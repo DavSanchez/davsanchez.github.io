@@ -215,8 +215,8 @@ Algunos de estos operadores y su función son los siguientes:
   el token `!` que representara la negación lógica), podría aplicar la función que está dentro del
   `TokenParser` (es decir, mi `a -> a`) a un `TokenParser` parametrizado sobre un tipo que pueda
   servir como parámetro para la función. Por ejemplo, `unaryOperator <*> boolParser` si
-  `boolParser :: TokenParser Bool`. Es una forma de secuenciación de operaciones algo menos general
-  que `>>=`.
+  `boolParser :: TokenParser Bool`. Es una forma de secuenciación de operaciones algo más general
+  que `>>=`. Solo con esto ya podemos hacer mucho de lo comentado en este artículo.
 - `*>`: Aplica la función y luego descarta el valor del primer argumento. Esto es útil si nos
   interesa que la primera aplicación no haya fallado, pero no nos interesa su valor. Si con esto no
   lo ves del todo claro, mira los ejemplos a continuación.
@@ -356,8 +356,9 @@ parseGrouping' = leftParen *> (Grouping <$> parseExpression) <* rightParen
 
 Con estos dos superpoderes (secuenciación con `do` y elección con `<|>`), el código del parser de Lox en Haskell se parece sorprendentemente a la gramática formal del lenguaje.
 
-Aquí tienes un ejemplo real de mi implementación para parsear una expresión unaria (`!true` o `-5`) donde
-sí utilizamos el _token_ que hemos capturado en `satisfy`:
+Aquí tienes otro ejemplo de implementación para _parsear_ una expresión unaria (`!true` o `-5`) donde
+sí utilizamos el _token_ que hemos capturado en `satisfy`, usando la notación `do`, llamadas recursivas al mismo _parser_ y el operador
+ de alternativa `<|>`:
 
 ```haskell
 unary :: TokenParser Expression
@@ -376,7 +377,7 @@ unary =
 
 Es declarativo, limpio y maneja los errores y el estado (la lista de _tokens_ restantes) automáticamente "entre bastidores" gracias a la clase de tipo mónada y a todos los operadores que los requisitos de esta clase impuso sobre nuestro tipo.
 
-Comparado con la implementación típica de descenso recursivo imperativo, donde tienes que comprobar manualmente `match(TOKEN)` y avanzar el puntero, esto se siente como describir **qué** es el lenguaje en función de las piezas primitivas que lo componen, en lugar de **cómo** leerlo.
+Comparado con la implementación típica de descenso recursivo imperativo, donde tienes que comprobar manualmente `match(TOKEN)` y avanzar el puntero, esto es más como describir **qué** es el lenguaje en función de las piezas primitivas que lo componen, en lugar de **cómo** leerlo.
 
 ## Conclusión
 
