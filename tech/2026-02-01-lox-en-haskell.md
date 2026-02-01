@@ -629,9 +629,17 @@ Es una forma limitada de _fuzz testing_ que comprueba una propiedad en tus funci
 
 ## Conclusiones
 
-Me he excedido demasiado, así que voy cerrando.
+Uff, ¡Vaya tocho me ha quedado! A ver si vamos cerrando.
 
-En resumen, implementar Lox en Haskell ha sido un ejercicio de traducción cultural. Como Haskell
+### Orientación a objetos por medio de lo funcional
+
+En resumen, implementar Lox en Haskell ha sido un ejercicio de traducción cultural. No solo es que
+el lenguaje propuesto para implementar Lox sea Java, sino que el propio Lox es orientado a objetos, con herencia y todo,
+¡y además con tipado dinámico! Ha sido instructivo ver cómo implementar estos paradigmas desde un lenguaje que en cierto modo es todo lo contrario.
+
+En el club de lectura hemos bromeado en que ahora solo me falta implementar un lenguaje funcional y estáticamente tipado utilizando Java. Creo que mejor _más adelante_...
+
+Como Haskell
 es mi "lenguaje _hobby_", ya estaba familiarizado a un nivel u otro con todas las herramientas que acabé utilizando. Con todo, me ha venido bien este repaso: tratar de adaptar los conceptos de Java según iban apareciendo, implementar algunas cosas a mano en lugar de tirar de librerías (e.g. `megaparsec` para los _parsers_) y atacar un proyecto con múltiples secciones (escáner, _parser_, _resolver_, intérprete) con el que poder visitar un aspecto diferente cada vez (funciones a mano, _parser combinators_, _monad transformers_).
 
 El proyecto han sido menos de 2500 líneas de Haskell, aderezados con algo de Nix y otras cosas. Esto es lo que me muestra `tokei`:
@@ -658,15 +666,66 @@ $ tokei
 
 No sé de dónde ha salido el HTML y JavaScript, imagino que estará contando alguna ubicación con la documentación renderizada por `cabal`.
 
+### Cosas que me han gustado
+
+#### El estilo del autor
+
+Es un libro fresco, ilustrativo y muy entretenido de leer. Con muchos diagramas e ilustraciones, símiles con comida, algunos sarcasmos y bromas sin llegar a saturar, etc.
+
+Siendo _teleco_, nunca estudié formalmente compiladores ni gramáticas, pero al princpio percibía estos temas desde fuera como algo más bien arcano. Esta percepción también la tenía el propio Nystrom, como menciona en la introducción, así que es loable su intento, más que exitoso, de darle un enfoque más fresco a algo tradicionalmente arduo.
+
+Armado con lo que este libro te proporciona, puedes animarte a seguir explorando el tema por tu cuenta y quizá incluso hasta [vencer a ese dragón](https://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools).
+
+No sé si su otro libro ([Game Programming Patterns](https://gameprogrammingpatterns.com)) será igual.
+
+#### Un paradigma frente a otro
+
 Es curioso ver frente a frente las diferencias entre un paradigma y otro.
 
 - Donde OOP con Java ve **Comportamiento encapsulado con datos**, FP con Haskell ve **Datos puros y funciones transformadoras**.
 - Donde OOP con Java usa **Objetos con distinta identidad**, FP con Haskell usa **Tipos con igualdad estructural**.
 - Donde OOP con Java usa **Excepciones y mutabilidad**, FP con Haskell usa **Tipos, mónadas y transformadores**.
 
-A día de hoy, sigo sabiendo con cuál me quedo para representar y resolver mis problemas.
+A día de hoy, sigo sabiendo con cuál me quedo para representar y resolver mis problemas, pero sería de idiotas no
+estar familiarizado con los paradigmas de la mayoría del código que se sigue escribiendo por ahí.
 
 Arquitecturas como la **Resolución basada en Tipos** me han mostrado un poder de expresividad y seguridad que difícilmente quiero abandonar para volver al mundo de `void foo()`. Haskell es una herramienta inmensamente poderosa que no solo resuelve problemas, sino que afila la mente del programador en el proceso.
+
+#### La _suite_ de testing de Crafting Interpreters
+
+Es muy completa y recomiendo a cualquier persona que quiera seguir el libro que dedique un poco de tiempo a
+configurar algo de CI de forma que se ejecuten los tests de cada capítulo con tu intérprete.
+
+En mi caso ensució un poco el código (tuve que mantener expuestas las funciones que emitían la lista de _tokens_, usar funciones que formateaban la salida de estas representaciones intermedias tal y como los tests esperaban, etc), pero da bastante paz mental abrir una _Pull Request_ por capítulo a tu propio repositorio y ver cómo los tests correspondientes al capítulo de la _suite_ oficial pasan al completo.
+
+Una consecuencia algo negativa de esto es que me hizo no escribir tantos tests unitarios o _property-based testing_ como habría sido ideal. Total, si pasaban los tests oficiales es que iba por buen camino.
+
+### Cosas que no me han gustado
+
+#### Reporte de errores
+
+No es solo que le tenga manía a las excepciones y el libro las haya usado en gran medida para gestionar los errores,
+sino que el reporte de errores es introducido en los primeros capítulos, creo que en el 4 (_Scanning_), y carece en todo momento de tests exhaustivos o unas directrices homogéneas que definan exactamente cómo debe portarse en todos los casos.
+
+Al llegar al capítulo 6 (_Parsing Expressions_) se pasa un poco por encima de la sincronización, la recuperación del _panic mode_, etc, pero no hay unos tests que te digan que tu reporte de errores está en la forma correcta. Pasa lo propio cuando llegamos a la implementación del intérprete, el _resolver_, etc. La única forma que tienes de darte cuenta es cuando los tests te fallan porque el mensaje de error no está emitido como espera el test de turno, que recuerdo puede ser un test del intérprete, del _resolver_, del _parser_ o de lo que haya tocado.
+
+Esto causó que hubiera pocos capítulos en los que no tuviera que toquetear la gestión de los errores después de hacer algo que no estaba relacionado más allá de especificar el tipo de error en la firma de las funciones. Unos tests dedicados al principio podían haber hecho que me peleara un poco más con ese aspecto en ese momento para luego no volver a tocarlo más.
+
+Fue bastante molesto.
+
+#### Un poco repetitivo
+
+Quizá sea por lo que comentaba al principio de que no me ha enseñado nada totalmente nuevo de Haskell, quizá es debido a que Haskell es especialmente idóneo para desarrollar lenguajes y lo convierte en un trámite, o quizá sea más probablemente por la propia naturaleza del proyecto, pero en mi percepción la implementación se volvía algo repetitiva con el tiempo:
+
+1. Añade este nuevo elemento a la gramática.
+2. Añade variantes al AST.
+3. Añade funciones al _parser_ para emitir esas nuevas variantes de tu AST.
+4. Añade gestión de las nuevas variantes del AST en el _resolver_.
+5. Añade gestión de las nuevas variantes del AST en el intérprete.
+
+Ciertamente había algo de desafío cada vez. ¿Cómo se interpreta exactamente `this` o `super`? ¿Cómo se _llaman_ las funciones o métodos? ¿Cómo se crea una instancia de una clase y se saben los métodos que tiene la instancia a su disposición, etc? Pero había toda una ceremonia a repetir con cada nuevo rasgo que añadías al lenguaje que lo volvía algo tedioso.
+
+### Código completo de `hox`
 
 El código completo está disponible en el repositorio de [`hox`](https://github.com/DavSanchez/hox). ¡Echa un vistazo!
 
