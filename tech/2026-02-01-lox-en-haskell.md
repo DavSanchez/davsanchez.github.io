@@ -6,8 +6,7 @@ page:
   bodyHtml: |
     <snippet var="js.mermaid" />
   description: |
-    O, en resumen, qué tal estuvo implementar un lenguaje de programación orientado a objetos basado en clases
-    usando **programación funcional pura y estáticamente tipada.
+    O, en resumen, qué tal estuvo implementar un lenguaje de programación con tipado dinámico y orientado a objetos, con clases y herencia, utilizando **programación funcional pura y estáticamente tipada.
 tags:
   - haskell
   - fp
@@ -18,8 +17,8 @@ tags:
 <!-- LTeX: language=es -->
 
 > [!info] O, en resumen,
-> _Qué tal estuvo implementar un lenguaje de programación orientado a objetos basado en clases
-> usando **programación funcional pura y estáticamente tipada**._
+> _Qué tal estuvo implementar un lenguaje de programación con tipado dinámico y orientado a objetos,
+> con clases y herencia, utilizando **programación funcional pura y estáticamente tipada**._
 >
 > ![Jean-Baptiste Emmanuel Zorg diciendo "mi favorito".](https://camo.githubusercontent.com/c553f4c74ab9dba08d78c9511cfd7a4fd19dd4047ac86e608ea581d3526778be/68747470733a2f2f6d656469612e74656e6f722e636f6d2f584a77773370595a59394d41414141432f7a6f72672d6d792d6661766f75726974652e676966)
 >
