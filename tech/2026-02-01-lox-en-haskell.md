@@ -107,7 +107,7 @@ Pero como uso Nix, no tengo que preocuparme de este problema en absoluto. No ten
 herramientas específicas para el lenguaje de turno ni arriesgarme a conflictos con herramientas
 instaladas globalmente (un saludo, Python).
 
-Busco Dart en el repositorio de paquetes más grande y más actualizado del mundo, `nixpkgs`. Busco
+Busco Dart en el repositorio de paquetes de Nix, `nixpkgs`, el [más grande y más actualizado del mundo](https://repology.org/repositories/statistics/total). Busco
 la revisión de `git` de `nixpkgs` que contenga la versión de Dart que me sirve. Fijo la revisión
 como entrada a mi _flake_... y listo, **Dart 2.19.6** listo para ejecutar en mi terminal. Gracias a
 `direnv`, en el momento en el que salgo del directorio del proyecto el ejecutable de `dart`
