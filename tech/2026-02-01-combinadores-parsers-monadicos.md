@@ -3,7 +3,6 @@ title: "Introducción a los Combinadores de Parsers Monádicos"
 short-title: "Combinadores de Parsers Monádicos"
 date: 2026-02-01
 page:
-  image: blog/img/monadic-parser-combinator-legos.png
   description: |
     Este artículo nace de una sección que creció demasiado en mi artículo sobre implementar Lox en Haskell.
 
