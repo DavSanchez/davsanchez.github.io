@@ -16,7 +16,7 @@ tags:
 ![Los combinadores unen cada parser como piezas de lego](./img/monadic-parser-combinator-legos.png)
 
 > [!info] Contexto
-> Este artículo nace de una sección que creció demasiado en mi [artículo sobre implementar Lox en Haskell](./BLOG_DRAFT.md).
+> Este artículo nace de una sección que creció demasiado en mi [artículo sobre implementar Lox en Haskell](./2026-02-01-lox-en-haskell.md).
 >
 > Aquí exploro cómo los combinadores permiten construir _parsers_ monádicos complejos componiendo piezas simples, y cómo el concepto de mónada ya aparece en cierta forma en Rust.
 
