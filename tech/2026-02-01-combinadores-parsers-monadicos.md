@@ -7,7 +7,7 @@ page:
   description: |
     Este artículo nace de una sección que creció demasiado en mi artículo sobre implementar Lox en Haskell.
 
-    Aquí exploro cómo los combinadores permiten construir _parsers_ monádicos complejos componiendo piezas simples, y cómo el concepto de mónada ya aparece en cierta forma en Rust.
+    Aquí exploro cómo los combinadores permiten construir parsers monádicos complejos componiendo piezas simples, y cómo el concepto de mónada ya aparece en cierta forma en Rust.
 tags:
   - haskell
   - fp
