@@ -629,19 +629,50 @@ Es una forma limitada de _fuzz testing_ que comprueba una propiedad en tus funci
 
 ## Conclusiones
 
-Implementar Lox en Haskell ha sido un ejercicio de traducción cultural.
+Me he excedido demasiado, así que voy cerrando.
 
-- Donde OOP ve **Comportamiento encapsulado con Datos**, FP ve **Datos puros y Funciones transformadoras**.
-- Donde OOP usa **Identidad de Objetos**, FP usa **Tipos Estructurales**.
-- Donde OOP usa **Excepciones y Mutabilidad**, FP usa **Mónadas y Transformadores**.
+En resumen, implementar Lox en Haskell ha sido un ejercicio de traducción cultural. Como Haskell
+es mi "lenguaje _hobby_", ya estaba familiarizado a un nivel u otro con todas las herramientas que acabé utilizando. Con todo, me ha venido bien este repaso: tratar de adaptar los conceptos de Java según iban apareciendo, implementar algunas cosas a mano en lugar de tirar de librerías (e.g. `megaparsec` para los _parsers_) y atacar un proyecto con múltiples secciones (escáner, _parser_, _resolver_, intérprete) con el que poder visitar un aspecto diferente cada vez (funciones a mano, _parser combinators_, _monad transformers_).
+
+El proyecto han sido menos de 2500 líneas de Haskell, aderezados con algo de Nix y otras cosas. Esto es lo que me muestra `tokei`:
+
+```console
+$ tokei
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ Language              Files        Lines         Code     Comments       Blanks
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ Cabal                     1          212          129           59           24
+ Haskell                  23         2985         2261          394          330
+ Markdown                  2           90            0           56           34
+ Nix                       2          295          152          134            9
+ Shell                     1           15            5            5            5
+ TOML                      1            9            5            3            1
+─────────────────────────────────────────────────────────────────────────────────
+ HTML                      1           39           37            0            2
+ |- JavaScript             1          943          759           30          154
+ (Total)                              982          796           30          156
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ Total                    31         4588         3348          681          559
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+No sé de dónde ha salido el HTML y JavaScript, imagino que estará contando alguna ubicación con la documentación renderizada por `cabal`.
+
+Es curioso ver frente a frente las diferencias entre un paradigma y otro.
+
+- Donde OOP con Java ve **Comportamiento encapsulado con datos**, FP con Haskell ve **Datos puros y funciones transformadoras**.
+- Donde OOP con Java usa **Objetos con distinta identidad**, FP con Haskell usa **Tipos con igualdad estructural**.
+- Donde OOP con Java usa **Excepciones y mutabilidad**, FP con Haskell usa **Tipos, mónadas y transformadores**.
+
+A día de hoy, sigo sabiendo con cuál me quedo para representar y resolver mis problemas.
 
 Arquitecturas como la **Resolución basada en Tipos** me han mostrado un poder de expresividad y seguridad que difícilmente quiero abandonar para volver al mundo de `void foo()`. Haskell es una herramienta inmensamente poderosa que no solo resuelve problemas, sino que afila la mente del programador en el proceso.
 
-El código completo está disponible en el repositorio.
+El código completo está disponible en el repositorio de [`hox`](https://github.com/DavSanchez/hox). ¡Echa un vistazo!
 
 ## Siguientes pasos
 
-### Rendimiento
+### Mejorar el rendimiento
 
 Mi implementación es una traducción en algunos casos equivalente a la de Java que iba siguiendo, en otros casos necesitada de enfoques alternativos.
 
