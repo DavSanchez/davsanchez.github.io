@@ -9,6 +9,7 @@ tags:
   - fp
   - tech
   - parsing
+  - type-driven development
   - 🇪🇸
 ---
 <!-- LTeX: language=es -->
