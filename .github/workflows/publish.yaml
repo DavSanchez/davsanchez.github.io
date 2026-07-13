@@ -19,7 +19,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: nixbuild/nix-quick-install-action@v35
       - name: Build the website (Nix) 🔧
         run: |
